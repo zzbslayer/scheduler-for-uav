@@ -2,6 +2,6 @@ FROM debian:stretch-slim
 
 WORKDIR /
 
-COPY _output/bin/scheduler-framework-sample /usr/local/bin
+COPY _output/bin/kube-scheduler /usr/local/bin
 
-CMD ["scheduler-framework-sample"]
+CMD ["kube-scheduler"]

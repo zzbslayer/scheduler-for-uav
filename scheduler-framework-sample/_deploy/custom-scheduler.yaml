@@ -1,0 +1,19 @@
+# copy to /etc/kubernetes/custom-scheduler.yaml on control plane
+apiVersion: kubescheduler.config.k8s.io/v1beta2
+kind: KubeSchedulerConfiguration
+# leaderElection:
+#   leaderElect: true
+#   lockObjectName: scheduler-framework-sample
+#   lockObjectNamespace: kube-system
+clientConnection:
+  kubeconfig: /etc/kubernetes/scheduler.conf
+profiles:
+  - schedulerName: default-scheduler
+  - schedulerName: scheduler-framework-sample
+    plugins:
+      filter:
+        enabled:
+        - name: "sample"
+      preBind:
+        enabled:
+        - name: "sample"
