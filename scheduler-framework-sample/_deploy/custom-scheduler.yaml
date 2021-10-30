@@ -9,10 +9,25 @@ clientConnection:
   kubeconfig: /etc/kubernetes/scheduler.conf
 profiles:
   - schedulerName: default-scheduler
+  - schedulerName: availability-filter-and-latency-score-scheduler
     plugins:
       filter:
         enabled:
-        - name: "sample"
+        - name: "availabilityawared"
+      score:
+        enabled:
+        - name: "latencyawared"
       preBind:
         enabled:
-        - name: "sample"
+        - name: "availabilityawared"
+  - schedulerName: latency-filter-and-availability-score-scheduler
+    plugins:
+      filter:
+        enabled:
+        - name: "latencyawared"
+      score:
+        enabled:
+        - name: "availabilityawared"
+      preBind:
+        enabled:
+        - name: "availabilityawared"

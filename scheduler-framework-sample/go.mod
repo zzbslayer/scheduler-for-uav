@@ -1,4 +1,4 @@
-module github.com/angao/scheduler-framework-sample
+module github.com/zzbslayer/scheduler-framework-sample
 
 go 1.16
 

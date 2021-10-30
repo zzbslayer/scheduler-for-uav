@@ -6,7 +6,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/angao/scheduler-framework-sample/pkg/plugins/sample"
+	"github.com/zzbslayer/scheduler-framework-sample/pkg/plugins/availabilityawared"
+	"github.com/zzbslayer/scheduler-framework-sample/pkg/plugins/latencyawared"
+
 	"k8s.io/component-base/logs"
 	"k8s.io/kubernetes/cmd/kube-scheduler/app"
 )
@@ -17,7 +19,8 @@ func main() {
 	defer logs.FlushLogs()
 
 	cmd := app.NewSchedulerCommand(
-		app.WithPlugin(sample.Name, sample.New),
+		app.WithPlugin(availabilityawared.Name, availabilityawared.New),
+		app.WithPlugin(latencyawared.Name, latencyawared.New),
 	)
 
 	if err := cmd.Execute(); err != nil {

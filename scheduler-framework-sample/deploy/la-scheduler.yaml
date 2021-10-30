@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: test-scheduler
+  name: la-scheduler
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: test-scheduler
+      app: la-scheduler
   template:
     metadata:
       labels:
-        app: test-scheduler
+        app: la-scheduler
     spec:
-      schedulerName: default-scheduler
+      schedulerName: latency-filter-and-availability-score-scheduler
       containers:
       - image: nginx
         imagePullPolicy: IfNotPresent
