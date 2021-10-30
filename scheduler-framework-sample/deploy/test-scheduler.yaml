@@ -12,7 +12,7 @@ spec:
       labels:
         app: test-scheduler
     spec:
-      schedulerName: scheduler-framework-sample
+      schedulerName: default-scheduler
       containers:
       - image: nginx
         imagePullPolicy: IfNotPresent

@@ -1,20 +1,29 @@
-# 运行须知
+# 步骤
+连接到 control plane 节点后执行以下命令
+```sh
+# compile scheduler
+go build -o=_output/bin/kube-scheduler ./cmd/scheduler
+# build image
+docker build --no-cache . -t scheduler-framework-sample:test
 
-Kubernetes 提供 Scheduler Framework 接口可以实现自定义的调度逻辑。
+# config setup
+sudo cp _deploy/custom-scheduler.yaml /etc/kubernetes/custom-scheduler.yaml
+sudo cp _deploy/kube-scheduler.yaml /etc/kubernetes/manifests/bak-custom-kube-scheduler.yaml
+# backup for default config
+sudo cp /etc/kubernetes/manifests/kube-scheduler.yaml /etc/kubernetes/manifests/bak-kube-scheduler.yaml
+# after this line, k8s will automatically use our image as scheduler
+sudo cp /etc/kubernetes/manifests/bak-custom-kube-scheduler.yaml /etc/kubernetes/manifests/kube-scheduler.yaml
+# check
+kubectl logs kube-scheduler-kube1 -n kube-system
+kubectl get pods -l component=kube-scheduler -n kube-system -o=jsonpath="{.items[0].spec.containers[0].image}{'\n'}"
 
-需要停止原本的 kube-scheduler 才能使用。
+# each time we need to update the image, change the kube-scheduler and change it back
+sudo cp /etc/kubernetes/manifests/bak-kube-scheduler.yaml /etc/kubernetes/manifests/kube-scheduler.yaml
+sudo cp /etc/kubernetes/manifests/bak-custom-kube-scheduler.yaml /etc/kubernetes/manifests/kube-scheduler.yaml
 
-## Plugin 与 Scheduler 的关系
+```
 
-以本项目中的 `pkg/plugins/sample/sample.go` 为例，我们实现了一个名为 `sample` 的插件，这个插件实现了 `Filter` 与 `Prebind` 两个扩展点。
-
-项目运行时，将 `sample` 插件注册到 Kubernetes 集群中，并根据 `_deploy/scheduler-config.yaml` 中的配置，创建了一个名为 `scheduler-framework-sample` 的调度器实例，这个调度器的 `Filter` 与 `Prebind` 启用了来自 `sample` 插件的实现。
- 
-## 运行
-
-修改 control plane 节点上的 /etc/kuberentes/manifest/kube-scheduler.yaml 将其中的 image 修改为我们的镜像，其他参数根据需要求改。
-
-# 代码脚本
+# 自用代码脚本
 ## reset k8s
 ```sh
 kubeadm reset -f
@@ -22,6 +31,8 @@ kubeadm init --config=/home/reins/kubeadm.yml
 
 kubeadm token create --print-join-command # print join command on master and execute it on slaves
 ```
+
+##
 
 ## build & test
 ```sh
@@ -31,30 +42,25 @@ go mod tidy
 go mod vendor
 
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64
-go build -o=_output/bin/scheduler-framework-sample ./cmd/scheduler
+go build -o=_output/bin/kube-scheduler ./cmd/scheduler
 # build image
-docker build --no-cache . -t scheduler-framework-sample:$(TAG)
 docker build --no-cache . -t scheduler-framework-sample:test
 # test locally
-./_output/bin/scheduler-framework-sample --config=./_deploy/scheduler-config.yaml --v=3
+./_output/bin/kube-scheduler --config=./_deploy/scheduler-config.yaml --v=3
 # test in docker
-docker run -itd scheduler-framework-sample:test scheduler-framework-sample --config=/scheduler-config.yaml --kubeconfig=/kube-config.yaml
-docker run -itd scheduler-framework-sample:test
+docker run -itd scheduler-framework-sample:test kube-scheduler --config=/scheduler-config.yaml
+docker run -it scheduler-framework-sample:test bash
+
+sudo cp ~/wjs/scheduler-for-uav/scheduler-framework-sample/_deploy/custom-scheduler.yaml /etc/kubernetes/custom-scheduler.yaml
+sudo cp ~/wjs/scheduler-for-uav/scheduler-framework-sample/_deploy/kube-scheduler.yaml /etc/kubernetes/manifests/bak-custom-kube-scheduler.yaml
+
+sudo cp bak-custom-kube-scheduler.yaml kube-scheduler.yaml
+sudo cp bak-kube-scheduler.yaml kube-scheduler.yaml
 # test in k8s
-kubectl apply -f ./deploy
-```
+kubectl get pods -n kube-system
+kubectl logs kube-scheduler-kube1 -n kube-system
+kubectl get pods -l component=kube-scheduler -n kube-system -o=jsonpath="{.items[0].spec.containers[0].image}{'\n'}"
 
-## publish image
-```sh
-# export
-docker save $(IMAGE_ID) > scheduler-framework-sample.tar
-docker save b9eaed08cb9a > scheduler-framework-sample.tar
-scp scheduler-framework-sample.tar reins@10.0.0.217:/home/reins
-# import
-docker load < scheduler-framework-sample.tar
-# rename
-docker tag $(IMAGE_ID) scheduler-framework-sample:test
-docker tag b9eaed08cb9a scheduler-framework-sample:test
-
+kubectl apply -f test-scheduler.yaml
 ```
 

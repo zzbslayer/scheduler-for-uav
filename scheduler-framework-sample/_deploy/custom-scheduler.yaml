@@ -9,7 +9,6 @@ clientConnection:
   kubeconfig: /etc/kubernetes/scheduler.conf
 profiles:
   - schedulerName: default-scheduler
-  - schedulerName: scheduler-framework-sample
     plugins:
       filter:
         enabled:
