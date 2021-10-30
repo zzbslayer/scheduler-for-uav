@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: test-scheduler
+  name: al-scheduler
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: test-scheduler
+      app: al-scheduler
   template:
     metadata:
       labels:
-        app: test-scheduler
+        app: al-scheduler
     spec:
       schedulerName: availability-filter-and-latency-score-scheduler
       containers:

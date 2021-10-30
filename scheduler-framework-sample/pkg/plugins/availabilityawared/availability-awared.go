@@ -2,6 +2,7 @@ package availabilityawared
 
 import (
 	"context"
+	"fmt"
 	"math"
 
 	v1 "k8s.io/api/core/v1"
@@ -18,7 +19,6 @@ const (
 var _ framework.FilterPlugin = &AvailabilityAwared{}
 var _ framework.PreBindPlugin = &AvailabilityAwared{}
 var _ framework.ScorePlugin = &AvailabilityAwared{}
-
 
 type AvailabilityAwared struct {
 	handle framework.Handle
@@ -40,9 +40,17 @@ func (aa *AvailabilityAwared) Filter(ctx context.Context, state *framework.Cycle
 }
 
 func (aa *AvailabilityAwared) Score(ctx context.Context, state *framework.CycleState, pod *v1.Pod, nodeName string) (int64, *framework.Status) {
-	var score int64 = 1
-	klog.Infof("[Availability-Awared] score pod %v for %v", pod.Name, score)
-	return score, nil
+	klog.Infof("[Latency-Awared] score pod: %v", pod.Name)
+	nodeInfo, err := aa.handle.SnapshotSharedLister().NodeInfos().Get(nodeName)
+	if err != nil {
+		return 0, framework.NewStatus(framework.Error, fmt.Sprintf("getting node %q from Snapshot: %v", nodeName, err))
+	}
+
+	return aa.score(nodeInfo)
+}
+
+func (aa *AvailabilityAwared) score(_ *framework.NodeInfo) (int64, *framework.Status) {
+	return 1, nil
 }
 
 func (aa *AvailabilityAwared) ScoreExtensions() framework.ScoreExtensions {
