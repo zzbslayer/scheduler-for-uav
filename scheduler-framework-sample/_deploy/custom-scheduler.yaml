@@ -17,6 +17,8 @@ profiles:
       score:
         enabled:
         - name: "latencyawared"
+        disabled:
+        - name: "*"
       preBind:
         enabled:
         - name: "availabilityawared"
@@ -28,6 +30,8 @@ profiles:
       score:
         enabled:
         - name: "availabilityawared"
+        disabled:
+        - name: "*"
       preBind:
         enabled:
         - name: "availabilityawared"
