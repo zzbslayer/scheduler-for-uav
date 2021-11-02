@@ -7,8 +7,8 @@ go build -o=_output/bin/kube-scheduler ./cmd/scheduler
 docker build --no-cache . -t scheduler-framework-sample:test
 
 # config setup
-sudo cp _deploy/custom-scheduler.yaml /etc/kubernetes/custom-scheduler.yaml
-sudo cp _deploy/kube-scheduler.yaml /etc/kubernetes/manifests/bak-custom-kube-scheduler.yaml
+sudo cp manifests/custom-scheduler.yaml /etc/kubernetes/custom-scheduler.yaml
+sudo cp manifests/kube-scheduler.yaml /etc/kubernetes/manifests/bak-custom-kube-scheduler.yaml
 # backup for default config
 sudo cp /etc/kubernetes/manifests/kube-scheduler.yaml /etc/kubernetes/manifests/bak-kube-scheduler.yaml
 # after this line, k8s will automatically use our image as scheduler
