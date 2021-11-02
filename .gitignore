@@ -1,0 +1,6 @@
+.vscode/
+
+# Windows shortcuts
+*.lnk
+# General
+.DS_Store
