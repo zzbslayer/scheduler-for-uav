@@ -1,20 +1,31 @@
 package com.github.zzbslayer.autoscaling.service;
 
-
-import io.fabric8.kubernetes.api.model.NamespaceList;
-import io.fabric8.kubernetes.client.Config;
-import io.fabric8.kubernetes.client.ConfigBuilder;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.api.model.PodList;
+import io.fabric8.kubernetes.api.model.apps.DeploymentList;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-public class TestService {
-    public static void main(String[] args) {
-        Config config = new ConfigBuilder().withMasterUrl("http://10.0.0.94:8080").build();
-        KubernetesClient client = new DefaultKubernetesClient(config);
-        NamespaceList myNs = client.namespaces().list();
-        myNs.getItems().stream().forEach(e -> {
-            System.out.println(e.toString());
+@Service
+public class TestService implements InitializingBean {
+
+    @Autowired
+    KubernetesClient kubernetesClient;
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        PodList podList = kubernetesClient.pods().inNamespace("default").list();
+
+        podList.getItems().stream().forEach(e -> {
+            System.out.println(e.getMetadata());
         });
 
+        DeploymentList aDeploymentList = kubernetesClient.apps().deployments().inNamespace("default").list();
+        aDeploymentList.getItems().stream().forEach(e -> {
+            System.out.println(e.getMetadata());
+        });
+
+        kubernetesClient.apps().deployments().inNamespace("default").withName("nginx-deployment").scale(1);
     }
 }
