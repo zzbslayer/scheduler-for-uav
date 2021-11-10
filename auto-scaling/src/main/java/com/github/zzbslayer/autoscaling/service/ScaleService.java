@@ -48,11 +48,11 @@ public class ScaleService implements InitializingBean {
     }
 
     public void scaleDeployment(String namespace, String name, int replica) {
-        log.info("Scale '{}' in '{}' to {}", name, namespace, replica);
+        log.info("       Scale '{}' in '{}' to {}", name, namespace, replica);
         kubernetesClient.apps().deployments()
                 .inNamespace(namespace)
                 .withName(name)
-                .scale(1);
+                .scale(replica);
     }
 
 //    @Scheduled(cron = "0 5/30 * * * *")

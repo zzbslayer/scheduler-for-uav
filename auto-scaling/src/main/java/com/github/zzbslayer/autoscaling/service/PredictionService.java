@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -47,6 +48,7 @@ public class PredictionService implements InitializingBean {
         DeploymentList deploymentList = scaleService.getDeployments(kubernetesConfig.NAMESPACE);
         deploymentList.getItems().stream().forEach(deployment -> {
             String name =  deployment.getMetadata().getName();
+            log.debug("============================================");
             log.debug("Scaling deployment {} starts", name);
             int replica = getExpectedReplica(deployment);
             try {
@@ -57,6 +59,7 @@ public class PredictionService implements InitializingBean {
             }
             log.debug("Scaling deployment {} ends", name);
         });
+        log.debug("============================================");
     }
 
     // TODO
@@ -68,18 +71,18 @@ public class PredictionService implements InitializingBean {
 
     // TODO
     private int predictAccess(List<History> histories){
-        int res = 100;
-        log.debug("Prediction result: {}", res);
+        int res = 200;
+        log.debug("       Prediction result: {}", res);
         return res;
     }
 
     private int replicaCheck(int replica) {
         if (replica > 10) {
-            log.debug("Expected replica number {} is too big", replica);
+            log.debug("       Expected replica number {} is too big", replica);
             replica = 10;
         }
         else if (replica < 1) {
-            log.debug("Expected replica number {} is too small", replica);
+            log.debug("       Expected replica number {} is too small", replica);
             replica = 1;
         }
         return replica;
@@ -100,7 +103,7 @@ public class PredictionService implements InitializingBean {
 
                 try {
                     int ratio = Integer.parseInt(ratioStr);
-                    log.debug("Get ratio from label: {}", ratio);
+                    log.debug("       Get ratio from label: {}", ratio);
                     return ratio;
                 }
                 catch (NumberFormatException e) {
@@ -108,16 +111,29 @@ public class PredictionService implements InitializingBean {
             }
         }
 
-        log.debug("Get ratio by default: {}", kubernetesConfig.DEFAULT_REPLICA_RATIO);
+        log.debug("       Get ratio by default: {}", kubernetesConfig.DEFAULT_REPLICA_RATIO);
         return defaultVal;
     }
 
     private int getExpectedReplica(Deployment deployment) {
         String name = deployment.getMetadata().getName();
         List<History> histories = historyRepository.findLastNHistoryByName(name);
+        int currentAccess = histories.stream()
+                .max(Comparator.comparing(History::getCreateTime))
+                .get()
+                .getAccess();
         int futureAccess = predictAccess(histories);
+        int targetAccess = futureAccess;
+
+        /* If futureAccess is 200 => 2 replica and currentAccess is 300 => 3 replica,
+         * then we should scale by currentAccess (3 replica)
+         * that means proactive scaling only happens when access increasing
+         */
+        if (targetAccess > currentAccess)
+            targetAccess = currentAccess;
+
         int ratio = getRatio(deployment);
-        int replica = mapAccessToReplica(futureAccess, ratio);
+        int replica = mapAccessToReplica(targetAccess, ratio);
         return  replica;
     }
 }

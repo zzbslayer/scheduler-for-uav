@@ -17,7 +17,7 @@ public class History {
 
     private String name;
 
-    private String access;
+    private Integer access;
 
-    private Timestamp create_time;
+    private Timestamp createTime;
 }
