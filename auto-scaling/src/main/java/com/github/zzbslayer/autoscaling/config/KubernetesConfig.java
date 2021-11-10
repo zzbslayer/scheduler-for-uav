@@ -16,7 +16,7 @@ public class KubernetesConfig {
     @Value("${kubernetes.deployment.namespace}")
     public String NAMESPACE;
 
-    @Value("${kubernetes.deployment.default-replica-ratio")
+    @Value("${kubernetes.deployment.default-replica-ratio}")
     public Integer DEFAULT_REPLICA_RATIO;
 
     @Bean

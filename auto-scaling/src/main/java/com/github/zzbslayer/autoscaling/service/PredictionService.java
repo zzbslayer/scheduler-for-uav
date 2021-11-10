@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -37,19 +38,24 @@ public class PredictionService implements InitializingBean {
     public void afterPropertiesSet() throws Exception {
         log.info("Listing prediction result:");
         predictionRepository.findAll().forEach(e -> log.info("       '{}': {}", e.getName(), e.getPrediction()));
+
+        periodicalPrediction();
     }
 
     @Scheduled(cron = "0 1/30 * * * *")
     public void periodicalPrediction() {
         DeploymentList deploymentList = scaleService.getDeployments(kubernetesConfig.NAMESPACE);
         deploymentList.getItems().stream().forEach(deployment -> {
+            String name =  deployment.getMetadata().getName();
+            log.debug("Scaling deployment {} starts", name);
             int replica = getExpectedReplica(deployment);
             try {
-                scaleService.scaleDeployment(kubernetesConfig.NAMESPACE, deployment.getMetadata().getName(), replica);
+                scaleService.scaleDeployment(kubernetesConfig.NAMESPACE, name, replica);
             }
             catch (Exception e) {
                 e.printStackTrace();
             }
+            log.debug("Scaling deployment {} ends", name);
         });
     }
 
@@ -62,14 +68,18 @@ public class PredictionService implements InitializingBean {
 
     // TODO
     private int predictAccess(List<History> histories){
-        return 100;
+        int res = 100;
+        log.debug("Prediction result: {}", res);
+        return res;
     }
 
     private int replicaCheck(int replica) {
         if (replica > 10) {
+            log.debug("Expected replica number {} is too big", replica);
             replica = 10;
         }
         else if (replica < 1) {
+            log.debug("Expected replica number {} is too small", replica);
             replica = 1;
         }
         return replica;
@@ -81,19 +91,23 @@ public class PredictionService implements InitializingBean {
 
     private int getRatio(Deployment deployment) {
         int defaultVal = kubernetesConfig.DEFAULT_REPLICA_RATIO;
-        String ratioStr = deployment.getMetadata()
-                .getLabels()
-                .get(RATIO_KEY);
-        if (ratioStr != null) {
 
-            try {
-                int ratio = Integer.parseInt(ratioStr);
-                log.debug("Get ratio from label: {}", ratio);
-                return ratio;
-            }
-            catch (NumberFormatException e) {
+        Map<String, String> labels = deployment.getMetadata().getLabels();
+
+        if (labels != null) {
+            String ratioStr = labels.get(RATIO_KEY);
+            if (ratioStr != null) {
+
+                try {
+                    int ratio = Integer.parseInt(ratioStr);
+                    log.debug("Get ratio from label: {}", ratio);
+                    return ratio;
+                }
+                catch (NumberFormatException e) {
+                }
             }
         }
+
         log.debug("Get ratio by default: {}", kubernetesConfig.DEFAULT_REPLICA_RATIO);
         return defaultVal;
     }

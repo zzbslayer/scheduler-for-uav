@@ -2,16 +2,17 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: vnf-a
+  labels:
+    ratio: "100"
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: vnf-a
+      app: vnf-a-pod
   template:
     metadata:
       labels:
-        app: vnf-a
-        ratio: 100
+        app: vnf-a-pod
     spec:
       schedulerName: availability-filter-and-latency-score-scheduler
       containers:
