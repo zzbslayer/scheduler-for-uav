@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vnf-a
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vnf-a
+  template:
+    metadata:
+      labels:
+        app: vnf-a
+        ratio: 100
+    spec:
+      schedulerName: availability-filter-and-latency-score-scheduler
+      containers:
+      - image: nginx
+        imagePullPolicy: IfNotPresent
+        name: nginx
+        ports:
+        - containerPort: 80
