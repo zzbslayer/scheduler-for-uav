@@ -13,6 +13,9 @@ public class KubernetesConfig {
     @Value("${kubernetes.master}")
     public String KUBERNETES_MASTER;
 
+    @Value("${kubernetes.deployment.namespace}")
+    public String NAMESPACE;
+
     @Bean
     public KubernetesClient kubernetesClient() {
         Config config = new ConfigBuilder().withMasterUrl(KUBERNETES_MASTER).build();

@@ -23,6 +23,19 @@ sudo cp /etc/kubernetes/manifests/bak-custom-kube-scheduler.yaml /etc/kubernetes
 
 ```
 
+# 理论方法
+无人机集群中有一个 Cluster Head 负责集群对外通信。无人机网络中的节点可用性 `a_self`（挂掉的概率是 `f_self`） 需要结合节点自身可用性以及其他节点可用性 `a_other`（挂掉的概率是 `f_other`） 一起考虑。
+
+考虑其他节点可用性时还要结合网络拓扑结构考虑，其他节点挂了导致该节点与 CH 不连通也就意味着该节点挂了。因此可以用当前节点与 CH 之间的割断开的概率来估计，最小割断开的概率是最大的，因此可以用于估计其他节点对当前节点的影响。
+
+考虑节点自身可用性时还要结合电量。
+```
+a_self = a_machine * battery_percentage
+```
+
+最小割估计的方式与图卷积的思想类似。
+
+
 # 附录
 ## 更新依赖
 ```sh
