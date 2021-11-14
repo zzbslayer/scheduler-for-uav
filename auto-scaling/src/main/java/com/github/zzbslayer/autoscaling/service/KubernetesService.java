@@ -13,7 +13,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class ScaleService implements InitializingBean {
+public class KubernetesService implements InitializingBean {
 
     @Autowired
     KubernetesClient kubernetesClient;

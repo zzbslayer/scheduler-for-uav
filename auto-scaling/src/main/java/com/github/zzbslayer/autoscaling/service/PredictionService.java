@@ -28,7 +28,7 @@ public class PredictionService implements InitializingBean {
     HistoryRepository historyRepository;
 
     @Autowired
-    ScaleService scaleService;
+    KubernetesService kubernetesService;
 
     @Autowired
     KubernetesConfig kubernetesConfig;
@@ -45,14 +45,14 @@ public class PredictionService implements InitializingBean {
 
     @Scheduled(cron = "0 1/30 * * * *")
     public void periodicalPrediction() {
-        DeploymentList deploymentList = scaleService.getDeployments(kubernetesConfig.NAMESPACE);
+        DeploymentList deploymentList = kubernetesService.getDeployments(kubernetesConfig.NAMESPACE);
         deploymentList.getItems().stream().forEach(deployment -> {
             String name =  deployment.getMetadata().getName();
             log.debug("============================================");
             log.debug("Scaling deployment {} starts", name);
             int replica = getExpectedReplica(deployment);
             try {
-                scaleService.scaleDeployment(kubernetesConfig.NAMESPACE, name, replica);
+                kubernetesService.scaleDeployment(kubernetesConfig.NAMESPACE, name, replica);
             }
             catch (Exception e) {
                 e.printStackTrace();
