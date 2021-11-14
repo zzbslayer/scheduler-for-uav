@@ -16,9 +16,6 @@ public class KubernetesConfig {
     @Value("${kubernetes.deployment.namespace}")
     public String NAMESPACE;
 
-    @Value("${kubernetes.deployment.default-replica-ratio}")
-    public Integer DEFAULT_REPLICA_RATIO;
-
     @Bean
     public KubernetesClient kubernetesClient() {
         Config config = new ConfigBuilder().withMasterUrl(KUBERNETES_MASTER).build();

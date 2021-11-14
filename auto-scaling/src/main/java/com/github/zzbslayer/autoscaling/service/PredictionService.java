@@ -1,5 +1,7 @@
 package com.github.zzbslayer.autoscaling.service;
 
+import com.github.zzbslayer.autoscaling.algorithm.access2replica.AccessToReplicaAlgorithm;
+import com.github.zzbslayer.autoscaling.algorithm.prediction.PredictionAlgorithm;
 import com.github.zzbslayer.autoscaling.config.KubernetesConfig;
 import com.github.zzbslayer.autoscaling.entity.History;
 import com.github.zzbslayer.autoscaling.repo.HistoryRepository;
@@ -33,17 +35,22 @@ public class PredictionService implements InitializingBean {
     @Autowired
     KubernetesConfig kubernetesConfig;
 
-    String RATIO_KEY = "ratio";
+    @Autowired
+    PredictionAlgorithm predictionAlgorithm;
+
+    @Autowired
+    AccessToReplicaAlgorithm accessToReplicaAlgorithm;
+
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        log.info("Listing prediction result:");
-        predictionRepository.findAll().forEach(e -> log.info("       '{}': {}", e.getName(), e.getPrediction()));
+//        log.info("Listing prediction result:");
+//        predictionRepository.findAll().forEach(e -> log.info("       '{}': {}", e.getName(), e.getPrediction()));
 
         periodicalPrediction();
     }
 
-    @Scheduled(cron = "0 1/30 * * * *")
+    @Scheduled(cron = "0 1/10 * * * *")
     public void periodicalPrediction() {
         DeploymentList deploymentList = kubernetesService.getDeployments(kubernetesConfig.NAMESPACE);
         deploymentList.getItems().stream().forEach(deployment -> {
@@ -69,71 +76,12 @@ public class PredictionService implements InitializingBean {
         return names;
     }
 
-    // TODO
-    private int predictAccess(List<History> histories){
-        int res = 200;
-        log.debug("       Prediction result: {}", res);
-        return res;
-    }
-
-    private int replicaCheck(int replica) {
-        if (replica > 10) {
-            log.debug("       Expected replica number {} is too big", replica);
-            replica = 10;
-        }
-        else if (replica < 1) {
-            log.debug("       Expected replica number {} is too small", replica);
-            replica = 1;
-        }
-        return replica;
-    }
-
-    private int mapAccessToReplica(int access, int ratio) {
-        return replicaCheck(access / ratio);
-    }
-
-    private int getRatio(Deployment deployment) {
-        int defaultVal = kubernetesConfig.DEFAULT_REPLICA_RATIO;
-
-        Map<String, String> labels = deployment.getMetadata().getLabels();
-
-        if (labels != null) {
-            String ratioStr = labels.get(RATIO_KEY);
-            if (ratioStr != null) {
-
-                try {
-                    int ratio = Integer.parseInt(ratioStr);
-                    log.debug("       Get ratio from label: {}", ratio);
-                    return ratio;
-                }
-                catch (NumberFormatException e) {
-                }
-            }
-        }
-
-        log.debug("       Get ratio by default: {}", kubernetesConfig.DEFAULT_REPLICA_RATIO);
-        return defaultVal;
-    }
-
     private int getExpectedReplica(Deployment deployment) {
         String name = deployment.getMetadata().getName();
         List<History> histories = historyRepository.findLastNHistoryByName(name);
-        int currentAccess = histories.stream()
-                .max(Comparator.comparing(History::getCreateTime))
-                .get()
-                .getAccess();
-        int futureAccess = predictAccess(histories);
-        int targetAccess = futureAccess;
 
-        /* If futureAccess is 200 => 2 replica and currentAccess is 300 => 3 replica,
-         * then we should scale by currentAccess (3 replica)
-         * that means proactive scaling only happens when access increasing
-         */
-        if (targetAccess > currentAccess)
-            targetAccess = currentAccess;
-
-        int ratio = getRatio(deployment);
-        int replica = mapAccessToReplica(targetAccess, ratio);
+        int predictionAccess = predictionAlgorithm.predictAccess(deployment, histories);
+        int replica = accessToReplicaAlgorithm.accessToReplica(deployment, histories, predictionAccess);
         return  replica;
     }
 }
