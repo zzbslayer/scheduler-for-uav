@@ -16,8 +16,8 @@ spec:
     spec:
       schedulerName: availability-filter-and-latency-score-scheduler
       containers:
-      - image: nginx
+      - image: vnf-a
         imagePullPolicy: IfNotPresent
-        name: nginx
+        name: vnf-a
         ports:
         - containerPort: 80
