@@ -24,14 +24,25 @@ sudo cp /etc/kubernetes/manifests/bak-custom-kube-scheduler.yaml /etc/kubernetes
 ```
 
 # 理论方法
-无人机集群中有一个 Cluster Head 负责集群对外通信。无人机网络中的节点可用性 `a_self`（挂掉的概率是 `f_self`） 需要结合节点自身可用性以及其他节点可用性 `a_other`（挂掉的概率是 `f_other`） 一起考虑。
+无人机集群中有一个 Cluster Head(CH) 负责集群对外通信。
 
-考虑其他节点可用性时还要结合网络拓扑结构考虑，其他节点挂了导致该节点与 CH 不连通也就意味着该节点挂了。因此可以用当前节点与 CH 之间的割断开的概率来估计，最小割断开的概率是最大的，因此可以用于估计其他节点对当前节点的影响。
+无人机网络中的节点 i 可用性 `a^i_{node}` 需要结合节点自身可用性 `a^i_{self}` 以及其他节点可用性 `a^i_{other}` 一起考虑。
 
-考虑节点自身可用性时还要结合电量。
+```latex
+// temp solution
+a^i_{self} = f(a^i_{machine}, bp_i, **kwargs)
 ```
-a_self = a_machine * battery_percentage
+
+计算 `a^i_{self}` 时，可以结合目前已有的可用性模型。目前考虑以下因素，节点 i 自身机器可用性是 `a^i_{machine}`，剩余电量百分比 `bp_i`。
+
+
+计算 `a^i_{other}` 时要结合网络拓扑结构考虑，其他节点挂了导致该节点与 CH 不连通也就意味着该节点挂了。因此可以用当前节点与 CH 之间的割断开的概率来表示 `a^i_{other}`，最小割断开的概率是最大的，因此可以用最小割断开的概率估计 `a^i_{other}`。
+
+
+```latex
+a^i_{node} = g(a^i_{self}, a^i_{other})
 ```
+
 
 最小割估计的方式与图卷积的思想类似。
 

@@ -1,4 +1,7 @@
 .vscode/
+dataset/**/*.log
+dataset/**/*.csv
+
 
 # Windows shortcuts
 *.lnk
