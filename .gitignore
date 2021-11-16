@@ -1,7 +1,8 @@
 .vscode/
+
 dataset/**/*.log
 dataset/**/*.csv
-
+dataset/**/.ipynb_checkpoints/
 
 # Windows shortcuts
 *.lnk
