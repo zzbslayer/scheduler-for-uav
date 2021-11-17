@@ -78,7 +78,7 @@ public class PredictionService implements InitializingBean {
 
     private int getExpectedReplica(Deployment deployment) {
         String name = deployment.getMetadata().getName();
-        List<History> histories = historyRepository.findLastNHistoryByName(name);
+        List<History> histories = historyRepository.findLastNHistoryByName(name, 5);
 
         int predictionAccess = predictionAlgorithm.predictAccess(deployment, histories);
         int replica = accessToReplicaAlgorithm.accessToReplica(deployment, histories, predictionAccess);

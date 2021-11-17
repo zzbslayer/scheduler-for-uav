@@ -10,6 +10,6 @@ import java.util.List;
 
 @Repository
 public interface HistoryRepository extends CrudRepository<History, Integer> {
-    @Query(value = "select * from (select * from history where name=:name order by id DESC limit 5) sub order by id asc", nativeQuery = true)
-    List<History> findLastNHistoryByName(@Param("name") String name);
+    @Query(value = "select * from (select * from history where name=:name order by id DESC limit :n) sub order by id asc", nativeQuery = true)
+    List<History> findLastNHistoryByName(@Param("name") String name, @Param("n") int n);
 }
