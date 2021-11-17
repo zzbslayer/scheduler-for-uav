@@ -1,23 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: vnf-a
+  name: vnf-2
   labels:
     ratio: "100"
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: vnf-a-pod
+      app: vnf-2-pod
   template:
     metadata:
       labels:
-        app: vnf-a-pod
+        app: vnf-2-pod
     spec:
       schedulerName: availability-filter-and-latency-score-scheduler
       containers:
-      - image: vnf-a
+      - image: vnf-demo
         imagePullPolicy: IfNotPresent
-        name: vnf-a
+        name: vnf-2
         ports:
         - containerPort: 80
+        env:
+        - name: APP_NAME
+          value: "vnf-2"
