@@ -24,3 +24,5 @@ spec:
         env:
         - name: APP_NAME
           value: "vnf-2"
+        - name: APP_PORT
+          value: "80"
