@@ -19,6 +19,12 @@ public class RatioAccessToReplica implements AccessToReplicaAlgorithm {
     @Value("${kubernetes.deployment.ratio-key}")
     public String RATIO_KEY;
 
+    @Value("${kubernetes.deployment.replica.max}")
+    public Integer REPLICA_MAX;
+
+    @Value("${kubernetes.deployment.replica.min}")
+    public Integer REPLICA_MIN;
+
     @Override
     public int accessToReplica(Deployment deployment, List<History> histories, int predictionAccess) {
         int targetAccess = predictionAccess;
@@ -65,13 +71,13 @@ public class RatioAccessToReplica implements AccessToReplicaAlgorithm {
 
 
     private int replicaCheck(int replica) {
-        if (replica > 10) {
+        if (replica > REPLICA_MAX) {
             log.debug("       Expected replica number {} is too big", replica);
-            replica = 10;
+            replica = REPLICA_MAX;
         }
-        else if (replica < 1) {
+        else if (replica < REPLICA_MIN) {
             log.debug("       Expected replica number {} is too small", replica);
-            replica = 1;
+            replica = REPLICA_MIN;
         }
         return replica;
     }

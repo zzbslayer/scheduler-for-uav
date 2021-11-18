@@ -1,8 +1,9 @@
 .vscode/
+__pycache__/
+.ipynb_checkpoints/
 
 dataset/**/*.log
 dataset/**/*.csv
-dataset/**/.ipynb_checkpoints/
 
 # Windows shortcuts
 *.lnk

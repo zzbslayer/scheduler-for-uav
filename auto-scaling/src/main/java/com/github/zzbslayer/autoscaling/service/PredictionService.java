@@ -50,7 +50,7 @@ public class PredictionService implements InitializingBean {
         periodicalPrediction();
     }
 
-    @Scheduled(cron = "0 1/10 * * * *")
+    @Scheduled(cron = "0 6/10 * * * *")
     public void periodicalPrediction() {
         DeploymentList deploymentList = kubernetesService.getDeployments(kubernetesConfig.NAMESPACE);
         deploymentList.getItems().stream().forEach(deployment -> {

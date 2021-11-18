@@ -6,14 +6,12 @@ import com.github.zzbslayer.vnfdemo.entity.History;
 import com.github.zzbslayer.vnfdemo.repo.HistoryRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -39,7 +37,7 @@ public class AccessMetricService {
         return access.addAndGet(1);
     }
 
-    @Scheduled(cron = "0 5/10 * * * *")
+    @Scheduled(cron = "0 0/10 * * * *")
     public void updateAccess() {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.SECOND, 0);
