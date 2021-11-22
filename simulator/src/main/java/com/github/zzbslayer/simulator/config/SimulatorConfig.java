@@ -8,6 +8,6 @@ public class SimulatorConfig {
     @Value("${simulator.dataset}")
     public String DATASET_PATH;
 
-    @Value("${simulator.host}")
-    public String HOST;
+//    @Value("${simulator.host}")
+//    public String HOST;
 }

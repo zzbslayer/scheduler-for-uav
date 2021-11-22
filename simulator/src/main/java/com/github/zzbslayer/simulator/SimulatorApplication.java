@@ -1,6 +1,6 @@
 package com.github.zzbslayer.simulator;
 
-import com.github.zzbslayer.simulator.service.SimulatorService;
+import com.github.zzbslayer.simulator.service.Simulator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -9,11 +9,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class SimulatorApplication implements CommandLineRunner {
 	@Autowired
-	SimulatorService simulatorService;
+	Simulator simulator;
 
 	@Override
 	public void run(String... args) {
-		simulatorService.run();
+		simulator.run();
 	}
 
 	public static void main(String[] args) {
