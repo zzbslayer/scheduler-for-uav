@@ -35,8 +35,10 @@ public class HttpCallback implements Callback {
     public void onResponse(Response response) throws IOException {
         final long httpEndTimeStamp = System.currentTimeMillis();
         final long roundTripTime = httpEndTimeStamp - httpStartTimeStamp;
-
-        MetricRecorder.success(roundTripTime);
+        if (response.isSuccessful())
+            MetricRecorder.success(roundTripTime);
+        else
+            MetricRecorder.fail();
 
         log.debug("Get response {} from (source: {}  timestamp: {}  url: {}), RTT: {} ms", response.body().string(), source, timestamp, url, roundTripTime);
     }

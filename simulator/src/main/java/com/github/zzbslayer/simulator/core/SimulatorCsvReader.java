@@ -29,7 +29,7 @@ public class SimulatorCsvReader {
         String source = items[0];
         long timestamp = (long) Double.parseDouble(items[1]);
         String uri = items[2];
-        uri = UrlMapper.mapToRealUrl(uri);
+        uri = UrlMapper.mapToRealUrl(source, uri);
 
         while(true) {
             long currentMillis = System.currentTimeMillis();
@@ -55,7 +55,7 @@ public class SimulatorCsvReader {
         startMillis = System.currentTimeMillis();
         datasetStartMillis = timestamp;
 
-        String url = UrlMapper.mapToRealUrl(rawUrl);
+        String url = UrlMapper.mapToRealUrl(source, rawUrl);
 
         invokeHttpRequest(source, timestamp, url);
     }
