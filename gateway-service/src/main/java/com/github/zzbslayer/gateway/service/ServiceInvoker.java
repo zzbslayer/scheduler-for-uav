@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 @Service
 public class ServiceInvoker {
@@ -20,7 +21,10 @@ public class ServiceInvoker {
 
 
     public String invokeService(String serviceName) {
-        String url = findService(serviceName);
+        Optional<String> optionalS = findService(serviceName);
+        if (!optionalS.isPresent())
+            return "[ERROR] Service Not Found";
+        String url = optionalS.get();
         Request request = new Request.Builder().url(url).build();
         try {
             Response response = okHttpClient.newCall(request).execute();
@@ -31,11 +35,13 @@ public class ServiceInvoker {
         }
     }
 
-    private String findService(String serviceName) {
+    private Optional<String> findService(String serviceName) {
         RBucket <byte[]> bucket = redissonClient.getBucket(serviceName);
+        if (!bucket.isExists())
+            return Optional.empty();
         byte[] bytes = bucket.get();
         String s = new String(bytes, StandardCharsets.UTF_8);
 
-        return "http://" + s + "/" + serviceName + "/test";
+        return Optional.of("http://" + s + "/" + serviceName + "/test");
     }
 }
