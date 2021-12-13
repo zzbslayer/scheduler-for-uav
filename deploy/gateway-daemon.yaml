@@ -1,18 +1,17 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: fluentd-elasticsearch
-  namespace: kube-system
+  name: gateway
   labels:
-    k8s-app: gateway-daemon
+    app: gateway-daemon
 spec:
   selector:
     matchLabels:
-      name: gateway-daemon
+      name: gateway-pod
   template:
     metadata:
       labels:
-        name: gateway-daemon
+        name: gateway-pod
     spec:
       tolerations:
       # this toleration is to have the daemonset runnable on master nodes
