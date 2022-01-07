@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class SimulatorConfig {
+public class RequestSimulatorConfig {
     @Value("${simulator.dataset}")
     public String DATASET_PATH;
 

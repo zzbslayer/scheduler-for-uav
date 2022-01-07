@@ -5,6 +5,7 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,6 @@ public class ServiceInvoker {
 
     @Autowired
     RedissonClient redissonClient;
-
 
     public String invokeService(String serviceName) {
         Optional<String> optionalS = findService(serviceName);
@@ -40,8 +40,8 @@ public class ServiceInvoker {
         if (!bucket.isExists())
             return Optional.empty();
         byte[] bytes = bucket.get();
-        String s = new String(bytes, StandardCharsets.UTF_8);
+        String value = new String(bytes, StandardCharsets.UTF_8);
 
-        return Optional.of("http://" + s + "/" + serviceName + "/test");
+        return Optional.of("http://" + value + "/" + serviceName + "/test");
     }
 }

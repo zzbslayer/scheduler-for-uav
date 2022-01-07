@@ -25,5 +25,7 @@ public class History {
 
     private Integer access;
 
+    private String node;
+
     private Timestamp createTime;
 }

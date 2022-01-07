@@ -1,6 +1,6 @@
-package com.github.zzbslayer.simulator.core.http;
+package com.github.zzbslayer.simulator.core.request.http;
 
-import com.github.zzbslayer.simulator.core.utils.MetricRecorder;
+import com.github.zzbslayer.simulator.utils.MetricRecorder;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;

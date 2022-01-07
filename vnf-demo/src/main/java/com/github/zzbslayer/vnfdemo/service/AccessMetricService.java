@@ -1,6 +1,7 @@
 package com.github.zzbslayer.vnfdemo.service;
 
-import com.github.zzbslayer.vnfdemo.config.ApplicationConfig;
+import com.github.zzbslayer.vnfdemo.config.AppConfig;
+import com.github.zzbslayer.vnfdemo.config.SysConfig;
 import com.github.zzbslayer.vnfdemo.entity.Dblock;
 import com.github.zzbslayer.vnfdemo.entity.History;
 import com.github.zzbslayer.vnfdemo.repo.HistoryRepository;
@@ -19,7 +20,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 public class AccessMetricService {
     @Autowired
-    ApplicationConfig applicationConfig;
+    AppConfig appConfig;
+
+    @Autowired
+    SysConfig sysConfig;
 
     @Autowired
     HistoryRepository historyRepository;
@@ -37,7 +41,7 @@ public class AccessMetricService {
         return access.addAndGet(1);
     }
 
-    @Scheduled(cron = "0 0/10 * * * *")
+    @Scheduled(cron = "0 0/1 * * * *")
     public void updateAccess() {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.SECOND, 0);
@@ -45,18 +49,18 @@ public class AccessMetricService {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String createTime = format.format(calendar.getTime());
 
-        int hour = calendar.get(Calendar.MINUTE);
-        access.set(hour * 10);
+//        int hour = calendar.get(Calendar.MINUTE);
+//        access.set(hour * 10);
 
-        final String RESOURCE_LOCK = applicationConfig.APP_NAME + "_access";
-        Dblock dblock = lockService.lock(RESOURCE_LOCK, "lock of "+applicationConfig.APP_NAME+" for updating access metric");
+        final String RESOURCE_LOCK = appConfig.APP_NAME + "_access";
+        Dblock dblock = lockService.lock(RESOURCE_LOCK, "lock of "+ appConfig.APP_NAME+" for updating access metric");
 
         try {
-            Optional<History> _history = historyRepository.findHistoryByNameAndTime(applicationConfig.APP_NAME, createTime);
+            Optional<History> _history = historyRepository.findHistoryByNameAndTime(appConfig.APP_NAME, createTime);
             History history = _history.orElseGet(() -> {
                return History.builder()
                        .access(0)
-                       .name(applicationConfig.APP_NAME)
+                       .name(appConfig.APP_NAME)
                        .createTime(new Timestamp(calendar.getTimeInMillis()))
                        .build();
             });

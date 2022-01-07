@@ -1,4 +1,4 @@
-package com.github.zzbslayer.simulator.core.utils;
+package com.github.zzbslayer.simulator.utils;
 
 import java.util.HashMap;
 import java.util.Map;

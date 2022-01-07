@@ -1,9 +1,9 @@
-package com.github.zzbslayer.simulator.core;
+package com.github.zzbslayer.simulator.core.request;
 
-import com.github.zzbslayer.simulator.core.http.HttpCallback;
-import com.github.zzbslayer.simulator.core.http.HttpInvoker;
-import com.github.zzbslayer.simulator.core.utils.MetricRecorder;
-import com.github.zzbslayer.simulator.core.utils.UrlMapper;
+import com.github.zzbslayer.simulator.core.request.http.HttpCallback;
+import com.github.zzbslayer.simulator.core.request.http.HttpInvoker;
+import com.github.zzbslayer.simulator.utils.MetricRecorder;
+import com.github.zzbslayer.simulator.utils.UrlMapper;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;

@@ -1,4 +1,4 @@
-package com.github.zzbslayer.simulator.core.utils;
+package com.github.zzbslayer.simulator.utils;
 
 public class MetricRecorder {
     private static long sumRtt = 0;
