@@ -1,11 +1,13 @@
 package com.github.zzbslayer.simulator.utils;
 
+import com.github.zzbslayer.simulator.config.NodeConfig;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class UrlMapper {
     private static Map<String, String> serviceMap = new HashMap<>();
-    private static String[] nodeList = {"10.0.0.94", "10.0.0.217"};
+    private static String[] nodeList = NodeConfig.NODE_LIST;
 
     static  {
         serviceMap.put("/rank1", "vnf-2");

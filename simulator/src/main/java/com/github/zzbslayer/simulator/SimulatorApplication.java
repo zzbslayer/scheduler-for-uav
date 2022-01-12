@@ -13,7 +13,7 @@ public class SimulatorApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) {
-		requestSimulator.run();
+		//requestSimulator.run();
 	}
 
 	public static void main(String[] args) {

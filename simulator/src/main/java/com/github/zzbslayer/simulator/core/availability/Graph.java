@@ -12,11 +12,9 @@ public class Graph {
         }
     };
 
-    public static Graph randomUndirectedGraph(int nodeNum) {
+    public static int[][] randomUndirectedGraph(int nodeNum) {
         int[][] adjacencyMatrix = new int[nodeNum][nodeNum];
-        for (int i = 0; i < nodeNum; ++i) {
-            adjacencyMatrix[i][i] = 1;
-        }
+
         for (int i = 0; i < nodeNum-1; ++i) {
             for (int j = i + 1; j < nodeNum; ++j) {
                 int edge = randomThreadLocal.get().nextBoolean() ? 1 : 0;
@@ -24,8 +22,12 @@ public class Graph {
                 adjacencyMatrix[j][i] = edge;
             }
         }
-        Graph graph = new Graph(adjacencyMatrix);
-        return graph;
+        // 保证是一个连通图
+        for (int i = 0; i < nodeNum - 1; ++i) {
+            adjacencyMatrix[i][i+1] = 1;
+            adjacencyMatrix[i+1][i] = 1;
+        }
+        return adjacencyMatrix;
     }
 
     public Graph(int[][] aMatrix) {
@@ -43,5 +45,22 @@ public class Graph {
 
     private static String mapMatrixIndexToNodeName(int idx) {
         return "kube" + idx+1;
+    }
+
+    public static void printGraph(int[][] graph) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < graph.length; ++i) {
+            for (int j = 0; j < graph[0].length; ++j) {
+                sb.append(graph[i][j]);
+                sb.append(", ");
+            }
+            sb.append("\n");
+        }
+        System.out.print(sb.toString());
+    }
+
+    public static void main(String[] args) {
+        int[][] g = randomUndirectedGraph(5);
+        printGraph(g);
     }
 }

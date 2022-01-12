@@ -1,0 +1,13 @@
+package com.github.zzbslayer.simulator.service;
+
+import com.github.zzbslayer.simulator.core.availability.Graph;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+@Slf4j
+@Service
+public class GraphAvailabilitySimulator {
+    public void run() {
+        int[][] graph = Graph.randomUndirectedGraph(5);
+    }
+}
