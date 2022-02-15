@@ -1,7 +1,7 @@
 package com.github.zzbslayer.simulator.service;
 
 import com.github.zzbslayer.simulator.config.NodeConfig;
-import com.github.zzbslayer.simulator.core.availability.Graph;
+import com.github.zzbslayer.simulator.core.availability.graph.Graph;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;

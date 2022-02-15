@@ -1,4 +1,4 @@
-package com.github.zzbslayer.simulator.core.availability;
+package com.github.zzbslayer.simulator.core.availability.graph;
 
 import java.util.Random;
 
@@ -28,6 +28,14 @@ public class Graph {
             adjacencyMatrix[i+1][i] = 1;
         }
         return adjacencyMatrix;
+    }
+
+    public static double[] randomNodeAvailability(int nodeNum) {
+        double[] ava = new double[nodeNum];
+        for (int i = 0; i < nodeNum; ++i) {
+            ava[i] = (double) randomThreadLocal.get().nextInt(100) / 100;
+        }
+        return ava;
     }
 
     public Graph(int[][] aMatrix) {

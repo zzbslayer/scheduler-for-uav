@@ -1,11 +1,13 @@
 package com.github.zzbslayer.simulator.core.availability.algs;
 
+import com.github.zzbslayer.simulator.core.availability.graph.Graph;
+
 import java.util.*;
 import java.util.concurrent.LinkedBlockingDeque;
 
 public class FindMinCuts {
 
-    private int[][] findPathMatrix(int[][] graph, int src, int dst) {
+    public int[][] findPathMatrix(int[][] graph, int src, int dst) {
         List<List<Integer>> paths = findPaths(graph, src, dst);
 
         int[][] pathMatrix;
@@ -17,7 +19,7 @@ public class FindMinCuts {
      * find paths covering all edges ? error
      * the only way is to find all paths
      */
-    private static List<List<Integer>> findPaths(int[][] graph, int src, int dst) {
+    public static List<List<Integer>> findPaths(int[][] graph, int src, int dst) {
         List<List<Integer>> paths = new ArrayList<>();
 
         Queue<List<Integer>> bfs = new LinkedBlockingDeque<>();
@@ -50,18 +52,20 @@ public class FindMinCuts {
         return paths;
     }
 
-    private static int[][] calculatePathMatrix(List<List<Integer>> paths, int numOfNodes) {
+    public static int[][] calculatePathMatrix(List<List<Integer>> paths, int numOfNodes, int src, int target) {
         int numOfPaths = paths.size();
         int[][] pathMatrix = new int[numOfNodes][numOfPaths];
         for (int pathIndex = 0; pathIndex < numOfPaths; ++pathIndex) {
             for (int nodeIndex: paths.get(pathIndex)) {
+                if (nodeIndex == src || nodeIndex == target)
+                    continue;
                 pathMatrix[nodeIndex][pathIndex] = 1;
             }
         }
         return pathMatrix;
     }
 
-    private static List<int[]> findKCutFromPathMatrix(int[][] pathMatrix, int src, int dst, int k) {
+    public static List<int[]> findKCutFromPathMatrix(int[][] pathMatrix, int src, int dst, int k) {
         List<int[]> cuts = new ArrayList<>();
         // TODO refactor
         if (k == 1) {
@@ -114,8 +118,8 @@ public class FindMinCuts {
     }
 
     public static List<int[]> findKCutFromGraph(int[][] graph, int src, int dst, int k) {
-        List<List<Integer>> paths = findPaths(graph, 0, 5);
-        int[][] pathMatrix = calculatePathMatrix(paths, graph.length);
+        List<List<Integer>> paths = findPaths(graph, src, dst);
+        int[][] pathMatrix = calculatePathMatrix(paths, graph.length, src, dst);
         List<int[]> cuts = findKCutFromPathMatrix(pathMatrix, src, dst, k);
         return cuts;
     }
@@ -144,7 +148,7 @@ public class FindMinCuts {
         }
         System.out.println();
         System.out.println("Path Matrix:");
-        int[][] pathMatrix = calculatePathMatrix(paths, graph.length);
+        int[][] pathMatrix = calculatePathMatrix(paths, graph.length, src, dst);
         for (int[] line: pathMatrix) {
             for (int i: line) {
                 System.out.print(i + ", ");
