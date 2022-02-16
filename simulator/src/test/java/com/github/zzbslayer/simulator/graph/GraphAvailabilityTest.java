@@ -22,4 +22,20 @@ public class GraphAvailabilityTest {
         System.out.println("Graph Availability: " + graphAvailability);
         Assertions.assertEquals(0.97, graphAvailability);
     }
+
+    @Test
+    void testCase2() {
+        int graph[][] = new int[][]{
+                {0, 1, 1, 0, 1},
+                {1, 0, 1, 0, 0},
+                {1, 1, 0, 1, 0},
+                {0, 0, 1, 0, 1},
+                {1, 0, 0, 1, 0},
+        };
+        int[] failedNode = {-1, 0, 0, -1, 0};
+        Assertions.assertFalse(Graph.reachable(graph, failedNode,2, 4));
+
+        failedNode[3] = 0;
+        Assertions.assertTrue(Graph.reachable(graph, failedNode,2, 4));
+    }
 }

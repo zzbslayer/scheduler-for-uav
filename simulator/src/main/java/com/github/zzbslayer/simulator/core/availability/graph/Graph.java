@@ -1,6 +1,6 @@
 package com.github.zzbslayer.simulator.core.availability.graph;
 
-import java.util.Random;
+import java.util.*;
 
 public class Graph {
     private int[][] adjacencyMatrix;
@@ -53,6 +53,30 @@ public class Graph {
 
     private static String mapMatrixIndexToNodeName(int idx) {
         return "kube" + idx+1;
+    }
+
+    public static boolean reachable(int[][]graph, int[] failedNode, int src, int dst) {
+        Queue<Integer> queue = new LinkedList<>();
+        Set<Integer> visitedNode = new HashSet<>();
+        queue.offer(src);
+        boolean reachable = false;
+        while (!queue.isEmpty()) {
+            int node = queue.poll();
+            if (node == dst) {
+                reachable = true;
+                break;
+            }
+            if (visitedNode.contains(node))
+                continue;
+            visitedNode.add(node);
+            int[] neighbours = graph[node];
+            for (int i = 0; i < neighbours.length; ++i) {
+                if (neighbours[i] == 1 && failedNode[i] == 0) {
+                    queue.offer(i);
+                }
+            }
+        }
+        return reachable;
     }
 
     public static void printGraph(int[][] graph) {

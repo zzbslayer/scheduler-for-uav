@@ -46,15 +46,19 @@ public class GraphAvailabilitySimulation {
             sumK8s.add(k8s);
         }
 
-        log.info("Availability instance num: {}", sumAva.getInstance());
-        log.info("Availability fail instance num: {}", sumAva.getFailedInstance());
-        log.info("Availability fail rate: {}", sumAva.getFailRate());
+        printStatistics(sumAva);
+        printStatistics(sumK8s);
+    }
+
+    private static void printStatistics(ServiceFailureStatistics serviceFailureStatistics) {
+        log.info("instance num: {}", serviceFailureStatistics.getInstance());
+        log.info("fail instance num: {}", serviceFailureStatistics.getFailedInstance());
+        log.info("node num: {}", serviceFailureStatistics.getNode());
+        log.info("fail node num: {}", serviceFailureStatistics.getFailedNode());
+
+        log.info("fail rate: {}", serviceFailureStatistics.getFailRate());
 
         System.out.println();
-
-        log.info("K8S instance num: {}", sumK8s.getInstance());
-        log.info("K8S fail instance num: {}", sumK8s.getFailedInstance());
-        log.info("K8S fail rate: {}",sumK8s.getFailRate());
     }
 
     private static ServiceFailureStatistics simulateK8DefaultPlacement(ScenarioParamter scenarioParamter) {
@@ -115,7 +119,8 @@ public class GraphAvailabilitySimulation {
         int failedInstance = 0;
         int failedNode = 0;
         for (int i = 0; i < nodeWorkLoad.length; ++i) {
-            if (failure[i] == -1) {
+            if (failure[i] != 0) {
+                // 0 means live; -1 means dead; -2 means live but unreachable by master
                 ++failedNode;
                 failedInstance += (nodeWorkLoad[i]);
             }
@@ -193,6 +198,7 @@ public class GraphAvailabilitySimulation {
     }
 
     public static void main(String[] args) {
+        //simulateOnce();
         simulate(1000);
     }
 }
