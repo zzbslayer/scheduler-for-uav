@@ -1,4 +1,4 @@
-package com.github.zzbslayer.simulator.core.request.http;
+package com.github.zzbslayer.simulator.core.latency.http;
 
 import com.github.zzbslayer.simulator.utils.MetricRecorder;
 import com.squareup.okhttp.Callback;

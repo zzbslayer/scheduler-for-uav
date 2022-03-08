@@ -5,7 +5,7 @@ import com.github.zzbslayer.simulator.config.NodeConfig;
 import java.util.HashMap;
 import java.util.Map;
 
-public class UrlMapper {
+public class DataMapper {
     private static Map<String, String> serviceMap = new HashMap<>();
     private static String[] nodeList = NodeConfig.NODE_LIST;
 
@@ -27,5 +27,12 @@ public class UrlMapper {
         return "http://" + mapToNode(fromIp) + ":8000/gateway?service=" + mapToService(rawUrl);
     }
 
+    public static int mapSourceToNode(String from, int nodeNum) {
+        return Integer.valueOf(from.substring(4)) % nodeNum;
+    }
+
+    public static int mapUrlToService(String url, int serviceNum) {
+        return Integer.valueOf(url.substring(5)) % serviceNum;
+    }
 
 }

@@ -13,19 +13,20 @@ import java.util.*;
 @NoArgsConstructor
 @Builder
 public class ScenarioParamter {
+    public final static double PROBABILITY_RANGE = 0.05;
     private static ThreadLocal<Random> randomThreadLocal = new ThreadLocal<Random>() {
         @Override
         protected Random initialValue() {
             return new Random();
         }
     };
-    private final static double DEFAULT_EXPECTED_AVE_AVAILABILITY = 0.9;
-    private final static int DEFAULT_NODE_NUM = 5;
+    private final static double DEFAULT_EXPECTED_AVE_AVAILABILITY = 0.6;
+    private final static int DEFAULT_NODE_NUM = 8;
+    private final static int DEFAULT_SERVICE_NUM = 10;
     private final static int DEFAULT_MASTER_NODE = 2;
 
     int nodeNum;
     int serviceNum;
-    int replicaNum;
     int serviceResource;
     int clusterHead;
 
@@ -34,10 +35,13 @@ public class ScenarioParamter {
     int[] nodeCapacity;
     int[] failedNode;
 
+    double expectedAvailability;
+    double availabilityRange;
+
     /**
      *  naive version
      *  a service account for 1 capacity
-     *  a node with 5 capacity can run 5 services
+     *  a node with 5 capacity can run 5 serviceswan
      */
     static int[] generateNodeCapacity(int nodeNum) {
         int[] nodeCapacity = new int[nodeNum];
@@ -48,12 +52,14 @@ public class ScenarioParamter {
     }
 
     static double randomPercent(double expectedAve) {
-        // temp = (1 - 0.9)
-        // temp * 200 = 20
-        // [0, 20) / 100 = [0, 0.2)
-        // [0, 0.2] - temp + expected = [0.8, 1.0)
-        double temp = 1.0 - expectedAve;
-        return (double) randomThreadLocal.get().nextInt((int)(temp * 200)) / 100 - temp + expectedAve;
+        /**
+         * input expectedAve
+         * output random double around [expectedAve - range, expectedAve + range]
+         */
+        double randomDouble = randomThreadLocal.get().nextDouble() * PROBABILITY_RANGE * 2; // from 0 to range*2
+        double res = expectedAve - PROBABILITY_RANGE + randomDouble;
+        //System.out.println("??: " + res);
+        return res;
     }
 
     static double randomPercent() {
@@ -77,7 +83,6 @@ public class ScenarioParamter {
         int nodeNum = graph.length;
         int[] failure = new int[nodeNum];
 
-        int _cnt = 0;
         for (int i = 0; i < nodeNum; ++i) {
             if (i == master)
                 continue;
@@ -85,21 +90,16 @@ public class ScenarioParamter {
             //System.out.println( percentage+ ", " + availabilities[i]);
             if (percentage > availabilities[i]) {
                 failure[i] = -1;
-                _cnt++;
             }
         }
-        System.out.println(_cnt);
 
         for (int i = 0; i < nodeNum; ++i) {
             if (i == master)
                 continue;
             if (failure[i] == 0 && !Graph.reachable(graph, failure, i, master)) {
                 failure[i] = -2; // not connected
-                _cnt++;
             }
         }
-        System.out.println(_cnt);
-        System.out.println();
         return failure;
     }
 
@@ -107,20 +107,24 @@ public class ScenarioParamter {
 
 
     public static ScenarioParamter randomNewInstance() {
-        int nodeNum = DEFAULT_NODE_NUM;
+        return randomNewInstance(DEFAULT_NODE_NUM, DEFAULT_SERVICE_NUM, DEFAULT_EXPECTED_AVE_AVAILABILITY);
+    }
+
+    public static ScenarioParamter randomNewInstance(int nodeNum, int serviceNum, double ava) {
         int master = DEFAULT_MASTER_NODE;
-        double[] availabilities = generateNodeAvailability(nodeNum, DEFAULT_EXPECTED_AVE_AVAILABILITY);
+        double[] availabilities = generateNodeAvailability(nodeNum, ava);
         int[][] graph = Graph.randomUndirectedGraph(nodeNum);
         return ScenarioParamter.builder()
                 .nodeNum(nodeNum)
-                .serviceNum(8)
-                .replicaNum(1)
+                .serviceNum(serviceNum)
                 .serviceResource(1)
                 .clusterHead(master)
                 .graph(graph)
                 .availabilities(availabilities)
                 .nodeCapacity(generateNodeCapacity(nodeNum))
                 .failedNode(randomFailure(graph, availabilities, master))
+                .expectedAvailability(ava)
+                .availabilityRange(PROBABILITY_RANGE)
                 .build();
     }
 

@@ -1,4 +1,4 @@
-package com.github.zzbslayer.simulator.core.request.http;
+package com.github.zzbslayer.simulator.core.latency.http;
 
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.OkHttpClient;

@@ -10,7 +10,7 @@ public class GraphAvailabilitySimulator {
 
 
     public void run() {
-        GraphAvailabilitySimulation.simulate(1000);
+        GraphAvailabilitySimulation.simulate(1000, 10, 13,  0.9);
     }
 
 
