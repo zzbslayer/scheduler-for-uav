@@ -5,41 +5,41 @@ import com.github.zzbslayer.simulator.core.availability.utils.ScenarioParamter;
 import com.github.zzbslayer.simulator.core.latency.prediction.Prediction;
 import com.github.zzbslayer.simulator.core.latency.record.AccessRecord;
 import com.github.zzbslayer.simulator.core.latency.record.ServicePlacementRecord;
+import com.github.zzbslayer.simulator.core.latency.prediction.mapper.AccessInstanceMapper;
 import com.github.zzbslayer.simulator.core.latency.utils.LatencyAndWorkLoadStatistics;
 import com.github.zzbslayer.simulator.core.strategy.AvailabilityAwared;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.Map;
 
 @Slf4j
 public class SimulatedScheduler {
     ScenarioParamter scenarioParamter;
 
+    int[] expectedServiceReplicaNumOfNow;
     int[] actualServiceReplicaNum;
-    int[] expectedServiceReplicaNum;
-
-    int[] nodeWorkLoad;
+    int[] expectedServiceReplicaNumOfFuture;
 
     ServicePlacementRecord servicePlacementRecord;
     AccessRecord currentCycleAccessRecord;
     Prediction prediction;
 
-    AccessRecord predictedAccessRecord;
-
     LatencyAndWorkLoadStatistics latencyAndWorkLoadStatistics;
 
-    public SimulatedScheduler(ScenarioParamter scenarioParamter) {
+    AccessInstanceMapper mapper = AccessInstanceMapper.getMapper();
+
+    public SimulatedScheduler(ScenarioParamter scenarioParamter, Prediction prediction) {
         this.scenarioParamter = scenarioParamter;
-        this.expectedServiceReplicaNum = new int[scenarioParamter.getServiceNum()];
+
+        this.expectedServiceReplicaNumOfNow = new int[scenarioParamter.getServiceNum()];
+        this.expectedServiceReplicaNumOfFuture = new int[scenarioParamter.getServiceNum()];
         this.actualServiceReplicaNum = new int[scenarioParamter.getServiceNum()];
-        this.nodeWorkLoad = new int[scenarioParamter.getNodeNum()];
-        Arrays.fill(this.expectedServiceReplicaNum, 1);
+        Arrays.fill(this.expectedServiceReplicaNumOfFuture, 1);
 
         this.servicePlacementRecord = new ServicePlacementRecord(scenarioParamter.getGraph(), scenarioParamter.getServiceNum());
-        this.currentCycleAccessRecord = new AccessRecord(scenarioParamter.getNodeNum());
-        this.prediction = new Prediction(scenarioParamter.getNodeNum(), scenarioParamter.getServiceNum());
+        this.currentCycleAccessRecord = new AccessRecord(scenarioParamter.getNodeNum(), scenarioParamter.getServiceNum());
+        this.prediction = prediction;
 
         this.latencyAndWorkLoadStatistics = new LatencyAndWorkLoadStatistics();
 
@@ -47,7 +47,7 @@ public class SimulatedScheduler {
     }
 
     public void putServiceReplicaNum(int service, int replica) {
-        this.expectedServiceReplicaNum[service] = replica;
+        this.expectedServiceReplicaNumOfFuture[service] = replica;
     }
 
     /**
@@ -73,20 +73,31 @@ public class SimulatedScheduler {
         latencyAndWorkLoadStatistics.addHop(distance);
     }
 
-    public void resetAccessRecord() {
-        this.predictedAccessRecord.reset();
-    }
-
     public void predict() {
+        log.info("SimulatedScheduler.predict: ");
         /**
          * 更新平均机器负载指标
+         * TODO 更新 expectedReplicaNum; 节点访问量对于部署位置的影响
          */
-        this.latencyAndWorkLoadStatistics.addMachineWorkLoad(this.nodeWorkLoad);
-        this.predictedAccessRecord = this.prediction.predict(this.currentCycleAccessRecord);
+        this.currentCycleAccessRecord.printServiceAccessMap("Current access record: ");
+
+        // 更新当前访问量所需要的 replica
+        Map<Integer, Integer> nowSvcAccessMap = this.currentCycleAccessRecord.getServiceAccessMap();
+        for (int i = 0; i < expectedServiceReplicaNumOfNow.length; ++i) {
+            expectedServiceReplicaNumOfNow[i] = mapper.accessToInstance(nowSvcAccessMap.get(i));
+        }
+
+        /**
+         * Prediction 应直接返回 Service placement
+         */
+        int[] expectedServiceReplicaNumOfFuture = this.prediction.predict(this.currentCycleAccessRecord);
+        this.expectedServiceReplicaNumOfFuture = expectedServiceReplicaNumOfFuture;
     }
+
 
     private void printActualServicePlacement() {
         StringBuilder sb = new StringBuilder();
+        sb.append("Actual service placement: ");
         sb.append("[ ");
         for (int i: actualServiceReplicaNum) {
             sb.append(i);
@@ -95,6 +106,34 @@ public class SimulatedScheduler {
         sb.append("] ");
         log.info(sb.toString());
     }
+
+    private void printExpectedServicePlacement() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Expected service placement: ");
+        sb.append("[ ");
+        for (int i: expectedServiceReplicaNumOfFuture) {
+            sb.append(i);
+            sb.append(", ");
+        }
+        sb.append("] ");
+        log.info(sb.toString());
+    }
+
+    private void printNodeWorkLoad() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Node workload: ");
+        sb.append("[ ");
+        for (int i: servicePlacementRecord.getNodeWorkLoads()) {
+            sb.append(i);
+            sb.append(", ");
+        }
+        sb.append("] ");
+        log.info(sb.toString());
+    }
+
+    public void reset() {
+        this.currentCycleAccessRecord.reset();
+    }
     /**
      * Place unscheduled services to some nodes
      */
@@ -102,32 +141,43 @@ public class SimulatedScheduler {
 
         log.info("Before schedule: ");
         printActualServicePlacement();
+        printExpectedServicePlacement();
+        printNodeWorkLoad();
 
         for (int service = 0; service < actualServiceReplicaNum.length; ++service) {
             int actualReplica = actualServiceReplicaNum[service];
-            int expectedReplica = expectedServiceReplicaNum[service];
-            if (actualReplica < expectedReplica) {
-                int newReplica = expectedReplica - actualReplica;
+            int expectedReplicaOfFuture = expectedServiceReplicaNumOfFuture[service];
+            int expectedReplicaOfNow = expectedServiceReplicaNumOfNow[service];
+
+            if (actualReplica < expectedReplicaOfFuture) {
+                int newReplica = expectedReplicaOfFuture - actualReplica;
                 for (int j = 0; j < newReplica; ++j) {
                     // Update nodeWorkLoad
-                    int placedNode = AvailabilityAwared.placeService(this.scenarioParamter, this.nodeWorkLoad);
+                    // 一开始这块设计没做好，本来placeService 只是想找到最合适的节点，后来就直接更新 nodeWorkload 了，
+                    int placedNode = AvailabilityAwared.placeService(this.scenarioParamter, this.servicePlacementRecord.getNodeWorkLoads());
                     // Record service placement
                     this.servicePlacementRecord.putServiceAtNode(service, placedNode);
                 }
             }
-            else if (actualReplica > expectedReplica) {
-                int removeReplica = expectedReplica - actualReplica;
+            else if (actualReplica > expectedReplicaOfNow) {
+                int removeReplica = expectedReplicaOfNow - actualReplica;
                 for (int j = 0; j < removeReplica; ++j) {
-                    // TODO remove
+
                 }
             }
 
-            actualServiceReplicaNum[service] = expectedReplica;
+            actualServiceReplicaNum[service] = expectedReplicaOfFuture;
         }
 
         log.info("After schedule: ");
         printActualServicePlacement();
+        printNodeWorkLoad();
 
+        // UPDATE statistics
+        this.latencyAndWorkLoadStatistics.addMachineWorkLoad(this.servicePlacementRecord.getNodeWorkLoads());
+
+        // Reset at the end of schedule
+        this.reset();
     }
 
     public void print() {

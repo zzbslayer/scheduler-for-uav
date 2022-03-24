@@ -7,6 +7,7 @@ import com.github.zzbslayer.simulator.core.strategy.AvailabilityAwared;
 import com.github.zzbslayer.simulator.core.strategy.K8Default;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Arrays;
 import java.util.Random;
 
 @Slf4j
@@ -31,11 +32,11 @@ public class GraphAvailabilitySimulation {
         k8s.print();
     }
 
-    public static void simulate(int times, int nodeNum, int serviceNum, double ava) {
+    public static void simulate(int times, int nodeNum, int nodeCapacity, int serviceNum, double ava) {
         ServiceFailureStatistics sumAva = new ServiceFailureStatistics();
         ServiceFailureStatistics sumK8s = new ServiceFailureStatistics();
         for (int i = 0; i < times; ++i) {
-            ScenarioParamter scenarioParamter = ScenarioParamter.randomNewInstance(nodeNum, serviceNum, ava);
+            ScenarioParamter scenarioParamter = ScenarioParamter.randomNewInstance(nodeNum, nodeCapacity, serviceNum, ava);
             ServiceFailureStatistics avaStats = simulateAvailabilityAwaredPlacement(scenarioParamter);
             ServiceFailureStatistics k8sStats = simulateK8DefaultPlacement(scenarioParamter);
 
@@ -59,11 +60,13 @@ public class GraphAvailabilitySimulation {
         int[] nodeWorkLoad = new int[nodeNum];
         for (int i = 0; i < serviceNum; ++i) {
             for (int j = 0; j < replicaNum; ++j) {
-                K8Default.placeService(scenarioParamter, nodeWorkLoad);
+                int bestNode = K8Default.placeService(scenarioParamter, nodeWorkLoad);
+                nodeWorkLoad[bestNode] += scenarioParamter.getServiceResource();
             }
         }
         //printArray(nodeWorkLoad);
-        return calculateStatistics(scenarioParamter, nodeWorkLoad);
+        ServiceFailureStatistics res = calculateStatistics(scenarioParamter, nodeWorkLoad);
+        return res;
     }
 
     private static void printArray(int[] arr) {
@@ -101,7 +104,8 @@ public class GraphAvailabilitySimulation {
             }
         }
         //printArray(nodeWorkLoad);
-        return calculateStatistics(scenarioParamter, nodeWorkLoad);
+        ServiceFailureStatistics res = calculateStatistics(scenarioParamter, nodeWorkLoad);
+        return res;
     }
 
     private static ServiceFailureStatistics calculateStatistics(ScenarioParamter scenarioParamter, int[] nodeWorkLoad) {
@@ -115,28 +119,34 @@ public class GraphAvailabilitySimulation {
                 ++failedNode;
                 failedInstance += (nodeWorkLoad[i]);
             }
-
         }
-        return ServiceFailureStatistics.builder()
+
+        ServiceFailureStatistics res = ServiceFailureStatistics.builder()
+                .servicePlacementSquaresSum(Arrays.stream(nodeWorkLoad).map(x -> x*x).sum())
+                .servicePlacementSum(Arrays.stream(nodeWorkLoad).sum())
                 .failedInstance(failedInstance)
                 .instance(scenarioParamter.getServiceNum() * replicaNum)
                 .failedNode(failedNode)
                 .node(scenarioParamter.getNodeNum())
                 .build();
+
+        return res;
     }
 
 
-
     public static void main(String[] args) {
+
+
         //simulateOnce();
-        int times = 1000;
-        int nodeNum = 15;
-        int serviceNum = 20;
-        double ava = 0.95;
-        for (int i = 0; i < 5; i++) {
-            ava = 0.95 - 0.05 * i;
-            simulate(times, nodeNum, serviceNum, ava);
-        }
+//        int times = 1000;
+//        int nodeNum = 15;
+//        int nodeCapacity = 40;
+//        int serviceNum = 45;
+//        double ava = 0.95;
+//        for (int i = 0; i < 5; i++) {
+//            ava = 0.95 - 0.05 * i;
+//            simulate(times, nodeNum, nodeCapacity, serviceNum, ava);
+//        }
 
     }
 }

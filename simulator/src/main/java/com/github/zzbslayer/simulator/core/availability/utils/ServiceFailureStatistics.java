@@ -12,6 +12,13 @@ import lombok.extern.slf4j.Slf4j;
 @Builder
 @Slf4j
 public class ServiceFailureStatistics {
+    /**
+     * TODO standard deviation of service placement
+     */
+
+    int servicePlacementSum;
+    int servicePlacementSquaresSum;
+
     int instance;
     int failedInstance;
     int node;
@@ -22,7 +29,20 @@ public class ServiceFailureStatistics {
         return ((double) failedInstance) / instance;
     }
 
+    /**
+     * standard devication = sqrt( ave(x^2) - ave(x)^2 )
+     * @return
+     */
+    public double getStandardDeviationOfServicePlacement() {
+        double squareAve = 1.0 * servicePlacementSquaresSum / node;
+        double ave = 1.0 * servicePlacementSum / node;
+        return Math.sqrt(squareAve - ave*ave);
+    }
+
     public void add(ServiceFailureStatistics serviceFailureStatistics) {
+        this.servicePlacementSum += serviceFailureStatistics.getServicePlacementSum();
+        this.servicePlacementSquaresSum += serviceFailureStatistics.getServicePlacementSquaresSum();
+
         this.instance += serviceFailureStatistics.getInstance();
         this.failedInstance += serviceFailureStatistics.getFailedInstance();
         this.node += serviceFailureStatistics.getNode();
@@ -38,6 +58,7 @@ public class ServiceFailureStatistics {
         log.info("fail node num: {}", this.getFailedNode());
 
         log.info("fail rate: {}", this.getFailRate());
+        log.info("standarad deviation of service placement: {}", this.getStandardDeviationOfServicePlacement());
 
         System.out.println();
     }

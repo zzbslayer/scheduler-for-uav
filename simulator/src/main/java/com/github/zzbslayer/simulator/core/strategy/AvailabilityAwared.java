@@ -61,17 +61,20 @@ public class AvailabilityAwared {
 
 //        log.info(sb.toString());
         if (bestNode != -1) {
-            nodeWorkLoads[bestNode] += serviceResource;
+            // success
         }
         else {
+            printArray(nodeCapacities, "Node capacities");
+            printArray(nodeWorkLoads, "Node workloads");
             throw new RuntimeException("best node not found");
         }
         return bestNode;
     }
 
-    private static void printArray(int[] arr) {
+    private static void printArray(int[] arr, String title) {
         StringBuilder sb = new StringBuilder();
-        sb.append("Ava: [ ");
+        sb.append(title);
+        sb.append(": [ ");
         for (int i: arr) {
             sb.append(i);
             sb.append(", ");

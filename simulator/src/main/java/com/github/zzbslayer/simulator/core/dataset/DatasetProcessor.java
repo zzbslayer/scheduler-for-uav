@@ -1,6 +1,5 @@
-package com.github.zzbslayer.simulator.core.latency;
+package com.github.zzbslayer.simulator.core.dataset;
 
-import com.github.zzbslayer.simulator.utils.MetricRecorder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -10,16 +9,14 @@ import java.io.IOException;
 
 @Slf4j
 @Data
-public abstract class GraphLatencySimulation {
+public abstract class DatasetProcessor {
 
-    private String datasetPath;
+    protected String datasetPath;
 
-    GraphLatencySimulation() {}
+    public DatasetProcessor() {};
 
-    public static GraphLatencySimulation newInstance(String datasetPath) {
-        GraphLatencySimulation simulation = new InMemorySimulation();
-        simulation.setDatasetPath(datasetPath);
-        return simulation;
+    public DatasetProcessor(String datasetPath) {
+        this.datasetPath = datasetPath;
     }
 
     protected void start() {
@@ -51,7 +48,7 @@ public abstract class GraphLatencySimulation {
         while ((row = csvReader.readLine()) != null) {
             processLine(row);
             cnt++;
-            if (cnt >= 1000)
+            if (cnt >= 20000)
                 break;
         }
 
@@ -62,7 +59,6 @@ public abstract class GraphLatencySimulation {
             e.printStackTrace();
         }
 
-        //log.info("Success ratio: {}%, Average rtt: {}ms", String.format("%.2f", MetricRecorder.getSuccessRatio()*100) , MetricRecorder.getAverageRtt());
         csvReader.close();
     }
 
@@ -78,7 +74,5 @@ public abstract class GraphLatencySimulation {
     }
 
     public static void main(String[] args) {
-        GraphLatencySimulation simulation = GraphLatencySimulation.newInstance("F:/reins/scheduler-for-ad-hoc-network/dataset/web-server-log/kaggle-eliasdabbas-web-server-access-logs/access_log.csv");
-        simulation.execute();
     }
 }

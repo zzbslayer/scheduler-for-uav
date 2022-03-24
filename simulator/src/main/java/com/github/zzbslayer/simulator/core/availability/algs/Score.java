@@ -7,7 +7,8 @@ public class Score {
      * @param batteryAva
      * @return
      */
+    private final static double ALPHA = 0.8;
     public static double score(double graphAva, double batteryAva) {
-        return 0.8 * graphAva + 0.2 * batteryAva;
+        return ALPHA * graphAva + (1 - ALPHA) * batteryAva;
     }
 }

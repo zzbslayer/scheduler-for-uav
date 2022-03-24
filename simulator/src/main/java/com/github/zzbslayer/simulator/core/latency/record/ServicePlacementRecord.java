@@ -1,17 +1,23 @@
 package com.github.zzbslayer.simulator.core.latency.record;
 
 import com.github.zzbslayer.simulator.core.availability.graph.Graph;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
+@Data
 public class ServicePlacementRecord {
     int[][] graph;
+    // service, node, placement
     Map<Integer, Map<Integer, Integer>> servicePlacement = new HashMap<>();
+    int[] nodeWorkLoads;
 
     public ServicePlacementRecord(int[][] graph, int serviceNum) {
+        this.nodeWorkLoads = new int[graph.length];
+
         this.graph = graph;
         for (int i = 0; i < serviceNum; ++i) {
             servicePlacement.put(i, new HashMap<>());
@@ -21,13 +27,32 @@ public class ServicePlacementRecord {
     public void putServiceAtNode(int service, int node) {
         Map<Integer, Integer> temp = servicePlacement.get(service);
         temp.put(node, temp.getOrDefault(node, 0) + 1);
+
+        this.nodeWorkLoads[node]++;
     }
 
-    public void removeServiceFromNode(int service, int node) {
+    public void removeServiceFromNodeRoundRobin(int service, int removeNum) {
         Map<Integer, Integer> temp = servicePlacement.get(service);
-        int num = temp.getOrDefault(node, 0);
-        if (num > 0)
-            temp.put(node, num - 1);
+        int lastRemoveNum = removeNum;
+        while (removeNum > 0) {
+            removeNum = _removeServiceFromNodeRoundRobin(temp, removeNum);
+            if (removeNum == lastRemoveNum)
+                throw new RuntimeException("No service to remove");
+        }
+    }
+
+    private int _removeServiceFromNodeRoundRobin(Map<Integer, Integer> servicePlacement, int removeNum) {
+        for (Map.Entry<Integer, Integer> e: servicePlacement.entrySet()) {
+            if (removeNum == 0)
+                break;
+            int instances = e.getValue();
+            if (instances > 0) {
+                e.setValue(instances - 1);
+                --removeNum;
+                --this.nodeWorkLoads[e.getKey()];
+            }
+        }
+        return removeNum; // return remaining
     }
 
     public int findNearestService(int srcNode, int service) {
@@ -65,7 +90,7 @@ public class ServicePlacementRecord {
             }
             sb.append("\n");
         }
-        System.out.println(sb.toString());
+        log.info(sb.toString());
 
     }
 }

@@ -1,16 +1,15 @@
 package com.github.zzbslayer.simulator.core.latency;
 
+import com.github.zzbslayer.simulator.core.dataset.DatasetProcessor;
 import com.github.zzbslayer.simulator.core.latency.http.HttpCallback;
 import com.github.zzbslayer.simulator.core.latency.http.HttpInvoker;
 import com.github.zzbslayer.simulator.utils.DataMapper;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 
-@Data
 @Slf4j
-public class K8Simulation extends GraphLatencySimulation{
+public class K8Simulation extends DatasetProcessor {
     private long startMillis;
     private long datasetStartMillis;
 

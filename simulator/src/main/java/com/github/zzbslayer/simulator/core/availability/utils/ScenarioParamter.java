@@ -22,6 +22,7 @@ public class ScenarioParamter {
     };
     private final static double DEFAULT_EXPECTED_AVE_AVAILABILITY = 0.6;
     private final static int DEFAULT_NODE_NUM = 8;
+    private final static int DEFAULT_NODE_CAPACITY = 10;
     private final static int DEFAULT_SERVICE_NUM = 10;
     private final static int DEFAULT_MASTER_NODE = 2;
 
@@ -43,12 +44,12 @@ public class ScenarioParamter {
      *  a service account for 1 capacity
      *  a node with 5 capacity can run 5 serviceswan
      */
-    static int[] generateNodeCapacity(int nodeNum) {
-        int[] nodeCapacity = new int[nodeNum];
+    static int[] generateNodeCapacity(int nodeNum, int nodeCapacity) {
+        int[] nodeCapacities = new int[nodeNum];
         for (int i = 0; i < nodeNum; ++i) {
-            nodeCapacity[i] = 5;
+            nodeCapacities[i] = nodeCapacity;
         }
-        return nodeCapacity;
+        return nodeCapacities;
     }
 
     static double randomPercent(double expectedAve) {
@@ -73,9 +74,15 @@ public class ScenarioParamter {
 
     static double[] generateNodeAvailability(int nodeNum, double expectedAve) {
         double[] availabilities = new double[nodeNum];
-        for (int i = 0; i < nodeNum; ++i) {
-            availabilities[i] = randomPercent(expectedAve);
+        if (expectedAve == 1) {
+            Arrays.fill(availabilities, 1);
         }
+        else {
+            for (int i = 0; i < nodeNum; ++i) {
+                availabilities[i] = randomPercent(expectedAve);
+            }
+        }
+
         return availabilities;
     }
 
@@ -107,10 +114,10 @@ public class ScenarioParamter {
 
 
     public static ScenarioParamter randomNewInstance() {
-        return randomNewInstance(DEFAULT_NODE_NUM, DEFAULT_SERVICE_NUM, DEFAULT_EXPECTED_AVE_AVAILABILITY);
+        return randomNewInstance(DEFAULT_NODE_NUM, DEFAULT_NODE_CAPACITY, DEFAULT_SERVICE_NUM, DEFAULT_EXPECTED_AVE_AVAILABILITY);
     }
 
-    public static ScenarioParamter randomNewInstance(int nodeNum, int serviceNum, double ava) {
+    public static ScenarioParamter randomNewInstance(int nodeNum, int nodeCapacity, int serviceNum, double ava) {
         int master = DEFAULT_MASTER_NODE;
         double[] availabilities = generateNodeAvailability(nodeNum, ava);
         int[][] graph = Graph.randomUndirectedGraph(nodeNum);
@@ -121,7 +128,7 @@ public class ScenarioParamter {
                 .clusterHead(master)
                 .graph(graph)
                 .availabilities(availabilities)
-                .nodeCapacity(generateNodeCapacity(nodeNum))
+                .nodeCapacity(generateNodeCapacity(nodeNum, nodeCapacity))
                 .failedNode(randomFailure(graph, availabilities, master))
                 .expectedAvailability(ava)
                 .availabilityRange(PROBABILITY_RANGE)
