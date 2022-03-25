@@ -18,7 +18,6 @@ public class SimulatedScheduler {
     ScenarioParamter scenarioParamter;
 
     int[] expectedServiceReplicaNumOfNow;
-    int[] actualServiceReplicaNum;
     int[] expectedServiceReplicaNumOfFuture;
 
     ServicePlacementRecord servicePlacementRecord;
@@ -34,7 +33,6 @@ public class SimulatedScheduler {
 
         this.expectedServiceReplicaNumOfNow = new int[scenarioParamter.getServiceNum()];
         this.expectedServiceReplicaNumOfFuture = new int[scenarioParamter.getServiceNum()];
-        this.actualServiceReplicaNum = new int[scenarioParamter.getServiceNum()];
         Arrays.fill(this.expectedServiceReplicaNumOfFuture, 1);
 
         this.servicePlacementRecord = new ServicePlacementRecord(scenarioParamter.getGraph(), scenarioParamter.getServiceNum());
@@ -77,7 +75,7 @@ public class SimulatedScheduler {
         log.info("SimulatedScheduler.predict: ");
         /**
          * 更新平均机器负载指标
-         * TODO 更新 expectedReplicaNum; 节点访问量对于部署位置的影响
+         * TODO 点访问量对于部署位置的影响
          */
         this.currentCycleAccessRecord.printServiceAccessMap("Current access record: ");
 
@@ -99,7 +97,8 @@ public class SimulatedScheduler {
         StringBuilder sb = new StringBuilder();
         sb.append("Actual service placement: ");
         sb.append("[ ");
-        for (int i: actualServiceReplicaNum) {
+        int [] res = this.servicePlacementRecord.getServiceInstancePlacement();
+        for (int i: res) {
             sb.append(i);
             sb.append(", ");
         }
@@ -123,7 +122,8 @@ public class SimulatedScheduler {
         StringBuilder sb = new StringBuilder();
         sb.append("Node workload: ");
         sb.append("[ ");
-        for (int i: servicePlacementRecord.getNodeWorkLoads()) {
+        int[] workloads = servicePlacementRecord.getNodeWorkLoads();
+        for (int i: workloads) {
             sb.append(i);
             sb.append(", ");
         }
@@ -144,12 +144,17 @@ public class SimulatedScheduler {
         printExpectedServicePlacement();
         printNodeWorkLoad();
 
-        for (int service = 0; service < actualServiceReplicaNum.length; ++service) {
-            int actualReplica = actualServiceReplicaNum[service];
+        int[] actualServiceInstancePlacement = servicePlacementRecord.getServiceInstancePlacement();
+
+        for (int service = 0; service < scenarioParamter.getServiceNum(); ++service) {
+            int actualReplica = actualServiceInstancePlacement[service];
             int expectedReplicaOfFuture = expectedServiceReplicaNumOfFuture[service];
             int expectedReplicaOfNow = expectedServiceReplicaNumOfNow[service];
 
             if (actualReplica < expectedReplicaOfFuture) {
+                //log.info("adding service {} from {} to {}", service, actualReplica, expectedReplicaOfFuture);
+                //log.info("service {} has {} instances now", service, servicePlacementRecord.getServiceInstanceNum(service));
+
                 int newReplica = expectedReplicaOfFuture - actualReplica;
                 for (int j = 0; j < newReplica; ++j) {
                     // Update nodeWorkLoad
@@ -158,16 +163,24 @@ public class SimulatedScheduler {
                     // Record service placement
                     this.servicePlacementRecord.putServiceAtNode(service, placedNode);
                 }
+                //log.info("service {} has {} instances now", service, servicePlacementRecord.getServiceInstanceNum(service));
             }
+            /**
+             * 只有当前访问量所需要的实例数量小于目前部署实例数量时，需要缩容
+             */
             else if (actualReplica > expectedReplicaOfNow) {
-                int removeReplica = expectedReplicaOfNow - actualReplica;
-                for (int j = 0; j < removeReplica; ++j) {
+                log.info("removing service {} from {} to {}", service, actualReplica, expectedReplicaOfNow);
+                log.info("service {} has {} instances now", service, servicePlacementRecord.getServiceInstanceNum(service));
+                int removeReplica = actualReplica - expectedReplicaOfNow;
+                this.servicePlacementRecord.removeServiceFromNodeRoundRobin(service, removeReplica);
+                log.info("service {} has {} instances now", service, servicePlacementRecord.getServiceInstanceNum(service));
 
-                }
+                //以目前需要的实例数量为 expected
+                expectedServiceReplicaNumOfFuture[service] = expectedReplicaOfNow;
             }
-
-            actualServiceReplicaNum[service] = expectedReplicaOfFuture;
         }
+        // update actual service placement
+        this.servicePlacementRecord.calculateActualServicePlacement();
 
         log.info("After schedule: ");
         printActualServicePlacement();

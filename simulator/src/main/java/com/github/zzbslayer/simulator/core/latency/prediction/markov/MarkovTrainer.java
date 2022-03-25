@@ -1,8 +1,9 @@
-package com.github.zzbslayer.simulator.core.markov;
+package com.github.zzbslayer.simulator.core.latency.prediction.markov;
 
 import com.github.zzbslayer.simulator.core.availability.utils.ScenarioParamter;
 import com.github.zzbslayer.simulator.core.dataset.DatasetProcessor;
 import com.github.zzbslayer.simulator.config.LatencyExperimentConfig;
+import com.github.zzbslayer.simulator.core.dataset.ScheduleCycleDatasetProcessor;
 import com.github.zzbslayer.simulator.core.latency.record.AccessRecord;
 import com.github.zzbslayer.simulator.core.latency.prediction.mapper.AccessInstanceMapper;
 import com.github.zzbslayer.simulator.utils.DataMapper;
@@ -13,14 +14,9 @@ import java.io.FileReader;
 import java.io.IOException;
 
 @Slf4j
-public class TrainMarkov extends DatasetProcessor {
+public class MarkovTrainer extends ScheduleCycleDatasetProcessor {
 
-    private final static int SCHEDULE_CYCLE = LatencyExperimentConfig.SCHEDULE_CYCLE;
-    private final static ScenarioParamter SCENARIO_PARAMTER = LatencyExperimentConfig.SCENARIO_PARAMTER;
     private final static String DATASET_PATH = LatencyExperimentConfig.DATASET_PATH;
-
-    private long lastMillis = 0;
-    private long nextScheduleMillis = 0;
 
     // node, service, cnt
     private AccessRecord currentAccessRecord = new AccessRecord(SCENARIO_PARAMTER.getNodeNum(), ScenarioParamter.randomNewInstance().getServiceNum());
@@ -40,47 +36,15 @@ public class TrainMarkov extends DatasetProcessor {
     private final static int MARKOV_MATRIX_SIZE = LatencyExperimentConfig.MARKOV_MATRIX_SIZE;
     private double[][] markovState = new double[MARKOV_MATRIX_SIZE][MARKOV_MATRIX_SIZE];
 
-    public TrainMarkov() {
+    public MarkovTrainer() {
         super(DATASET_PATH);
     }
 
+    /**
+     * debug use
+     */
     public double[][] getMarkovState() {
         return markovState;
-    }
-
-    protected void processFirstLine(String line) throws IOException {
-        String[] items = line.split(",");
-        String source = items[0];
-        long timestamp = (long) Double.parseDouble(items[1]);
-        String rawUrl = items[2];
-
-        this.lastMillis = timestamp;
-        this.nextScheduleMillis = lastMillis + SCHEDULE_CYCLE;
-
-        int sourceNode = DataMapper.mapSourceToNode(source, SCENARIO_PARAMTER.getNodeNum());
-        int service = DataMapper.mapUrlToService(rawUrl, SCENARIO_PARAMTER.getNodeNum());
-
-        invokeRequest(sourceNode, service);
-
-    }
-
-    @Override
-    protected void processLine(String line) throws IOException {
-        String[] items = line.split(",");
-        String source = items[0];
-        long timestamp = (long) Double.parseDouble(items[1]);
-        String rawUrl = items[2];
-
-        int sourceNode = DataMapper.mapSourceToNode(source, SCENARIO_PARAMTER.getNodeNum());
-        int service = DataMapper.mapUrlToService(rawUrl, SCENARIO_PARAMTER.getNodeNum());
-
-
-        if (timestamp > nextScheduleMillis) {
-            updateScheduleCycle();
-        }
-
-
-        invokeRequest(sourceNode, service);
     }
 
     @Override
@@ -118,7 +82,7 @@ public class TrainMarkov extends DatasetProcessor {
     protected void end() {
 
         //printMarkovState();
-        // TODO print result and write to file
+        // writeStateToFile();
     }
 
     public void writeStateToFile() {
@@ -189,7 +153,8 @@ public class TrainMarkov extends DatasetProcessor {
         }
     }
 
-    private void updateScheduleCycle() {
+    @Override
+    protected void updateScheduleCycle() {
         if (firstCycle == false) {
             updateMarkovState();
         }
@@ -199,8 +164,6 @@ public class TrainMarkov extends DatasetProcessor {
 
         lastAccessRecord.copyFrom(currentAccessRecord);
         currentAccessRecord.reset();
-        nextScheduleMillis += SCHEDULE_CYCLE;
-
     }
 
     protected void invokeRequest(int sourceNode, int service) {
@@ -209,8 +172,8 @@ public class TrainMarkov extends DatasetProcessor {
 
 
     public static void main(String[] args) {
-        TrainMarkov trainMarkov = new TrainMarkov();
-        trainMarkov.execute();
-        trainMarkov.writeStateToFile();
+        MarkovTrainer markovTrainer = new MarkovTrainer();
+        markovTrainer.execute();
+        markovTrainer.writeStateToFile();
     }
 }

@@ -1,4 +1,4 @@
-package com.github.zzbslayer.simulator.core.markov;
+package com.github.zzbslayer.simulator.core.latency.prediction.markov;
 
 import com.github.zzbslayer.simulator.config.LatencyExperimentConfig;
 import lombok.extern.slf4j.Slf4j;

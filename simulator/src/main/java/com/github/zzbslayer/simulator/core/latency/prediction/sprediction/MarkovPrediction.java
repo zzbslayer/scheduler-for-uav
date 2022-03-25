@@ -3,11 +3,13 @@ package com.github.zzbslayer.simulator.core.latency.prediction.sprediction;
 import com.github.zzbslayer.simulator.config.LatencyExperimentConfig;
 import com.github.zzbslayer.simulator.core.latency.prediction.mapper.AccessInstanceMapper;
 import com.github.zzbslayer.simulator.core.latency.prediction.ServicePrediction;
-import com.github.zzbslayer.simulator.core.markov.FileHelper;
+import com.github.zzbslayer.simulator.core.latency.prediction.markov.FileHelper;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Deque;
 import java.util.Random;
 
+@Slf4j
 public class MarkovPrediction extends ServicePrediction {
     private double[][] markovState;
     private Random random = new Random();
