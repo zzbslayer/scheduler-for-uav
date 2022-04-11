@@ -16,8 +16,9 @@ def predict():
     inputs = json.get("data")
     if inputs == None or type(inputs) != list:
         return Response.bad_request()
-
+    
     res = predict_series(inputs)
+    res = res
     return Response.success(res)
         
 

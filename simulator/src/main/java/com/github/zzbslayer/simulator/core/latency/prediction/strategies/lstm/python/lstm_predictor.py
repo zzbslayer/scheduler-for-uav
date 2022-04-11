@@ -55,8 +55,8 @@ def test():
     predicted_stock_price = regressor.predict(X_test)
     predicted_stock_price = sc.inverse_transform(predicted_stock_price)
 
-    plt.plot(real_stock_price, color = 'black', label = 'Real value')
-    plt.plot(predicted_stock_price, color = 'green', label = 'Predicted value')
+    plt.plot(real_stock_price, marker='o', color = 'black', label = 'Real value')
+    plt.plot(predicted_stock_price, marker='o', color = 'green', label = 'Predicted value')
     plt.title('Request Prediction')
     plt.xlabel('Time')
     plt.ylabel('Request')

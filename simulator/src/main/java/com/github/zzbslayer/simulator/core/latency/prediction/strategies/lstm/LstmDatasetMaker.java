@@ -56,7 +56,7 @@ public class LstmDatasetMaker extends ScheduleCycleDatasetProcessor {
         StringBuilder sb = new StringBuilder();
         sb.append(lineCnt);
         sb.append(',');
-        sb.append(currentCycleAccessRecord.getAccess(1, 1));
+        sb.append(currentCycleAccessRecord.getAccess(1));
         sb.append(",\n");
 
         String res = sb.toString();
