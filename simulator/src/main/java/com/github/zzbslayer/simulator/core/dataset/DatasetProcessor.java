@@ -44,12 +44,8 @@ public abstract class DatasetProcessor {
         row = csvReader.readLine();
         processFirstLine(row);
 
-        int cnt = 0;
         while ((row = csvReader.readLine()) != null) {
             processLine(row);
-            cnt++;
-            if (cnt >= 20000)
-                break;
         }
 
         try {

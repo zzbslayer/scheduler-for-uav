@@ -1,4 +1,4 @@
-package com.github.zzbslayer.simulator.core.latency.prediction.nsprediction;
+package com.github.zzbslayer.simulator.core.latency.prediction.strategies.naive;
 
 import com.github.zzbslayer.simulator.core.latency.prediction.NodeServicePrediction;
 

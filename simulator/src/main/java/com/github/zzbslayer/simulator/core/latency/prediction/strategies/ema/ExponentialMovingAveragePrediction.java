@@ -1,4 +1,4 @@
-package com.github.zzbslayer.simulator.core.latency.prediction.nsprediction;
+package com.github.zzbslayer.simulator.core.latency.prediction.strategies.ema;
 
 import com.github.zzbslayer.simulator.core.latency.prediction.NodeServicePrediction;
 import lombok.extern.slf4j.Slf4j;

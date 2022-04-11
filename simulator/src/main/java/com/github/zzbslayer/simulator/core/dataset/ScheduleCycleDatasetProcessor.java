@@ -14,7 +14,7 @@ public abstract class ScheduleCycleDatasetProcessor extends DatasetProcessor {
     protected long lastMillis = 0;
     protected long nextScheduleMillis = 0;
 
-    public ScheduleCycleDatasetProcessor() {}
+    private ScheduleCycleDatasetProcessor() {}
 
     public ScheduleCycleDatasetProcessor(String datasetPath) {
         super(datasetPath);

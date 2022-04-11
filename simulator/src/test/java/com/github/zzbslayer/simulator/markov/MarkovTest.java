@@ -1,8 +1,8 @@
 package com.github.zzbslayer.simulator.markov;
 
 import com.github.zzbslayer.simulator.config.LatencyExperimentConfig;
-import com.github.zzbslayer.simulator.core.latency.prediction.markov.FileHelper;
-import com.github.zzbslayer.simulator.core.latency.prediction.markov.MarkovTrainer;
+import com.github.zzbslayer.simulator.core.latency.prediction.strategies.markov.FileHelper;
+import com.github.zzbslayer.simulator.core.latency.prediction.strategies.markov.MarkovTrainer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

@@ -4,14 +4,11 @@ import com.github.zzbslayer.simulator.core.availability.utils.ScenarioParamter;
 import com.github.zzbslayer.simulator.config.LatencyExperimentConfig;
 import com.github.zzbslayer.simulator.core.dataset.ScheduleCycleDatasetProcessor;
 import com.github.zzbslayer.simulator.core.latency.prediction.*;
-import com.github.zzbslayer.simulator.core.latency.prediction.nsprediction.ExponentialMovingAveragePrediction;
-import com.github.zzbslayer.simulator.core.latency.prediction.nsprediction.LastValuePrediction;
-import com.github.zzbslayer.simulator.core.latency.prediction.sprediction.MarkovPrediction;
+import com.github.zzbslayer.simulator.core.latency.prediction.strategies.ema.ExponentialMovingAveragePrediction;
+import com.github.zzbslayer.simulator.core.latency.prediction.strategies.naive.LastValuePrediction;
+import com.github.zzbslayer.simulator.core.latency.prediction.strategies.markov.MarkovPrediction;
 import com.github.zzbslayer.simulator.core.latency.scheduler.SimulatedScheduler;
-import com.github.zzbslayer.simulator.utils.DataMapper;
 import lombok.extern.slf4j.Slf4j;
-
-import java.io.IOException;
 
 @Slf4j
 public class InMemorySimulation extends ScheduleCycleDatasetProcessor {

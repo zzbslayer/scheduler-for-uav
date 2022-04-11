@@ -1,9 +1,9 @@
-package com.github.zzbslayer.simulator.core.latency.prediction.sprediction;
+package com.github.zzbslayer.simulator.core.latency.prediction.strategies.markov;
 
 import com.github.zzbslayer.simulator.config.LatencyExperimentConfig;
 import com.github.zzbslayer.simulator.core.latency.prediction.mapper.AccessInstanceMapper;
 import com.github.zzbslayer.simulator.core.latency.prediction.ServicePrediction;
-import com.github.zzbslayer.simulator.core.latency.prediction.markov.FileHelper;
+import com.github.zzbslayer.simulator.core.latency.prediction.strategies.markov.FileHelper;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Deque;
